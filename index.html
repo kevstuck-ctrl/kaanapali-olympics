@@ -1,0 +1,1663 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+<meta http-equiv="Pragma" content="no-cache" />
+<meta http-equiv="Expires" content="0" />
+<meta name="color-scheme" content="light dark" />
+<link rel="icon" href="data:," />
+<title>Kaanapali Olympics Scorekeeper</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Public+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --bg:#fdf4f1;
+    --surface:#fffdfb;
+    --surface-2:#fbeae9;
+    --ink:#2b2140;
+    --ink-soft:#6d6284;
+    --line:#ecd3dc;
+    --teal:#0e7c86;
+    --teal-deep:#0b4f5e;
+    --pink:#e75480;
+    --pink-soft:#fbdce7;
+    --purple:#6d4fa1;
+    --purple-soft:#e7ddf5;
+    --gold:#b8860b;
+    --gold-bg:#f9ecc0;
+    --gold-line:#dfb93e;
+    --silver:#71808c;
+    --silver-bg:#e9eef1;
+    --silver-line:#aebac2;
+    --bronze:#9c5a28;
+    --bronze-bg:#f6ddc2;
+    --bronze-line:#cf9257;
+    --fourth-bg:#efe9f8;
+    --danger:#b3372a;
+    --shadow:0 1px 3px rgba(80,44,110,.08);
+    --radius:14px;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --bg:#191226;
+      --surface:#251a38;
+      --surface-2:#2e2147;
+      --ink:#f3edf9;
+      --ink-soft:#bfb2d4;
+      --line:#43325f;
+      --teal:#37b6c2;
+      --teal-deep:#0b3542;
+      --pink:#ff7ba3;
+      --pink-soft:#4a2438;
+      --purple:#b79ae0;
+      --purple-soft:#372a55;
+      --gold:#eec95c;
+      --gold-bg:#4d3f14;
+      --gold-line:#a07d22;
+      --silver:#c3ced6;
+      --silver-bg:#37434d;
+      --silver-line:#66757f;
+      --bronze:#e0a266;
+      --bronze-bg:#4e3319;
+      --bronze-line:#8a5a2c;
+      --fourth-bg:#2e2147;
+      --danger:#ff8a7a;
+      --shadow:0 2px 12px rgba(0,0,0,.4);
+    }
+  }
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{
+    margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Public Sans",system-ui,-apple-system,sans-serif;
+    font-size:16px;line-height:1.45;
+  }
+  .wrap{max-width:860px;margin:0 auto;padding:0 16px 56px}
+
+  /* ---------- Masthead ---------- */
+  .masthead{
+    position:relative;overflow:hidden;color:#fff;
+    background:var(--teal-deep);
+    margin:0 -16px;padding:28px 20px 24px;
+    border-bottom:5px solid var(--pink);
+  }
+  /* ---------- View tabs: Scoreboard (front) / Details (all scoring) ---------- */
+  .view-tabs{
+    display:flex;gap:8px;margin:18px 0 0;background:var(--surface);
+    border:1px solid var(--line);border-radius:999px;padding:5px;
+  }
+  .view-tab{
+    appearance:none;cursor:pointer;flex:1;font-family:inherit;font-weight:800;
+    font-size:16px;padding:12px 10px;border-radius:999px;border:0;
+    background:transparent;color:var(--ink-soft);text-align:center;
+  }
+  .view-tab.active{background:var(--teal-deep);color:#fff}
+  .view-tab:focus-visible{outline:2px solid var(--teal);outline-offset:2px}
+  .view-note{font-size:13.5px;color:var(--ink-soft);margin:8px 4px 0;text-align:center}
+  [hidden]{display:none !important}
+  .masthead .palm{position:absolute;top:-6px;pointer-events:none;opacity:.5}
+  .masthead .palm.left{left:-14px}
+  .masthead .palm.right{right:-10px;transform:scaleX(-1)}
+  .masthead-inner{position:relative;z-index:1}
+  .masthead .where{
+    font-size:12px;font-weight:700;letter-spacing:.22em;text-transform:uppercase;
+    color:#ffd9e6;margin:0 0 4px;
+  }
+  .masthead h1{
+    font-family:"Bricolage Grotesque","Public Sans",sans-serif;
+    font-size:clamp(34px,9vw,52px);line-height:.98;font-weight:800;margin:0;
+  }
+  /* Details view: tables + breakdowns */
+  .detail-table{width:100%;border-collapse:collapse;font-size:14.5px;margin-top:10px}
+  .detail-table th,.detail-table td{padding:9px 8px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+  .detail-table th{font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-soft)}
+  .detail-table td.num,.detail-table th.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+  .detail-card{margin-top:16px}
+  .detail-card h3{margin:0 0 4px;font-family:"Bricolage Grotesque",sans-serif;font-size:20px}
+  .detail-card p.lead{margin:0;color:var(--ink-soft);font-size:14px}
+  .rules-list{margin:10px 0 0;padding-left:18px;color:var(--ink-soft);font-size:14.5px;line-height:1.6}
+  .rules-list b{color:var(--ink)}
+  @media (max-width:600px){
+    .view-tab{font-size:17px;padding:14px 8px}
+    .detail-table{font-size:15px}
+    .detail-table th,.detail-table td{padding:10px 6px}
+  }
+  /* ---------- Sections ---------- */
+  section{margin-top:30px}
+  .sec-head{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+  .sec-head h2{
+    font-family:"Bricolage Grotesque","Public Sans",sans-serif;
+    font-size:26px;font-weight:800;margin:0;
+  }
+  .sec-head .rule{font-size:13.5px;color:var(--ink-soft);margin:0;flex-basis:100%}
+  .sport-mark{
+    width:46px;height:46px;flex:0 0 46px;border-radius:13px;overflow:hidden;
+    background:#fff;box-shadow:var(--shadow);border:1px solid var(--line);
+  }
+  .sport-mark img{width:100%;height:100%;object-fit:cover;display:block}
+  .card{
+    background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
+    box-shadow:var(--shadow);padding:16px;margin-top:12px;
+  }
+
+  /* ---------- Scoreboard — total points (zoned) ---------- */
+  .race-card{padding:0;overflow:hidden;border:none}
+  .board-head{
+    display:grid;grid-template-columns:44px 56px 1fr auto;gap:10px;align-items:center;
+    padding:10px 14px;background:var(--teal-deep);color:#fff;
+    font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;
+  }
+  .board-head .bh-total{text-align:right;min-width:86px;padding-left:14px}
+  .board-head.nopic,.zrow.nopic{grid-template-columns:44px 1fr auto}
+  .players-head{
+    padding:12px 14px 2px;font-size:12px;font-weight:800;letter-spacing:.16em;
+    text-transform:uppercase;color:var(--ink-soft);
+  }
+  .players-row{
+    display:grid;grid-template-columns:repeat(4,1fr);gap:8px;
+    padding:8px 14px 14px;border-bottom:1px solid var(--line);
+  }
+  .players-row .pl{display:flex;flex-direction:column;align-items:center;gap:5px}
+  .players-row .pl .avatar{width:76px;height:76px}
+  .players-row .pl span{font-weight:800;font-size:14.5px}
+  @media (prefers-color-scheme: dark){ .board-head{background:#0b3542} }
+  .zone{padding:12px 14px 13px;border-bottom:1px solid rgba(0,0,0,.06)}
+  .zone:last-child{border-bottom:none}
+  .zone-tag{
+    display:inline-block;font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;
+    padding:3px 9px;border-radius:999px;margin-bottom:7px;background:rgba(255,255,255,.55);color:inherit;
+    border:1px solid currentColor;
+  }
+  @media (prefers-color-scheme: dark){ .zone-tag{background:rgba(0,0,0,.25)} }
+  .zone.gold{background:var(--gold-bg);color:#7a5b06;border-top:4px solid var(--gold-line)}
+  .zone.silver{background:var(--silver-bg);color:#48565f;border-top:4px solid var(--silver-line)}
+  .zone.bronze{background:var(--bronze-bg);color:#7c4517;border-top:4px solid var(--bronze-line)}
+  .zone.fourth{background:var(--fourth-bg);color:var(--purple);border-top:4px solid var(--purple)}
+  @media (prefers-color-scheme: dark){
+    .zone.gold{color:#f3d67c}
+    .zone.silver{color:#d3dde4}
+    .zone.bronze{color:#efbc8a}
+    .zone.fourth{color:#cdbcf0}
+  }
+  .zrow{display:grid;grid-template-columns:44px 56px 1fr auto;gap:10px;align-items:center;color:var(--ink)}
+  .avatar{border-radius:50%;object-fit:cover;flex:0 0 auto;background:var(--surface-2)}
+  .avatar.lg{width:54px;height:54px;border:2.5px solid rgba(255,255,255,.9);box-shadow:0 1px 6px rgba(43,33,64,.28)}
+  .avatar.md{width:30px;height:30px}
+  .avatar.sm{width:22px;height:22px;vertical-align:-6px;margin-right:5px}
+  .avatar.xs{width:20px;height:20px;vertical-align:-5px;margin-right:4px}
+  .medal{
+    width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+    font-family:"Bricolage Grotesque",sans-serif;font-weight:800;font-size:17px;
+    border:2px solid rgba(43,33,64,.25);background:var(--surface);color:var(--ink-soft);
+  }
+  .medal.gold{background:#f6d860;border-color:#b8860b;color:#6d4e00}
+  .medal.silver{background:#dbe3e9;border-color:#71808c;color:#3d4a54}
+  .medal.bronze{background:#eda964;border-color:#9c5a28;color:#5f350f}
+  .sname{font-weight:800;font-size:20px;line-height:1.15}
+  .sname.open-slot{font-weight:600;font-size:16px;color:var(--ink-soft);font-style:italic}
+  .sdetail{font-size:13px;color:var(--ink-soft);margin-top:1px}
+  .spts{text-align:right;min-width:86px;border-left:1px dashed rgba(43,33,64,.22);padding-left:14px}
+  .spts .big{
+    font-family:"Bricolage Grotesque",sans-serif;font-size:34px;font-weight:800;line-height:1;
+    font-variant-numeric:tabular-nums;
+  }
+  .spts .lbl{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-soft)}
+  .spts .pay{font-size:14px;font-weight:800;color:var(--teal);margin-top:2px}
+  .spts .pay.none{color:var(--ink-soft);font-weight:600}
+
+  /* ---------- Top: masthead + medal scoreboard scroll with the page ---------- */
+  .standings-sec{margin-top:22px}
+
+  /* ---------- Per-event tabs: a small row across the top of each section ---------- */
+  .ev-tabs{
+    background:var(--surface);
+    display:flex;flex-wrap:wrap;gap:6px;padding:2px 0 10px;
+    border-bottom:1px solid var(--line);margin-bottom:12px;
+  }
+  .ev-tabs .day-tab{font-size:13px;padding:7px 12px}
+  .day-tab{
+    appearance:none;cursor:pointer;font-family:inherit;font-weight:800;font-size:14.5px;
+    padding:10px 16px;border-radius:999px;border:1.5px solid var(--line);
+    background:var(--surface);color:var(--ink-soft);box-shadow:var(--shadow);
+  }
+  .day-tab.active{
+    background:var(--teal);color:#fff;border-color:transparent;
+  }
+  .day-tab.add-day{border-style:dashed;border-color:var(--teal);color:var(--teal)}
+  .add-day-pop{
+    display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:10px;
+    background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
+    box-shadow:var(--shadow);padding:12px 14px;
+  }
+  .add-day-pop[hidden]{display:none}
+  .add-day-pop label{font-size:13px;font-weight:700}
+  .add-day-pop input{
+    padding:9px 11px;font-size:15px;font-weight:600;font-family:inherit;
+    border:1.5px solid var(--line);border-radius:10px;background:var(--surface);color:var(--ink);
+  }
+  .add-day-pop input:focus{outline:2px solid var(--teal);outline-offset:1px;border-color:var(--teal)}
+  .pop-btn{
+    appearance:none;cursor:pointer;font-family:inherit;font-weight:800;font-size:14.5px;
+    padding:9px 15px;border-radius:999px;border:1.5px solid transparent;
+    background:var(--teal);color:#fff;
+  }
+  .pop-btn.ghost{background:var(--surface);color:var(--ink-soft);border-color:var(--line)}
+
+  /* ---------- Sheet (one view at a time, swapped in place) ---------- */
+  #sheet section:first-child{margin-top:24px}
+  .sheet-date-line{font-size:13.5px;color:var(--ink-soft);margin:0 0 12px}
+  .sheet-date-line b{color:var(--ink)}
+
+  /* ---------- Entry forms ---------- */
+  .score-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  @media (min-width:560px){ .score-grid{grid-template-columns:repeat(4,1fr)} }
+  .field label{display:block;font-size:13px;font-weight:700;margin-bottom:4px}
+  .field input{
+    width:100%;padding:12px;font-size:18px;font-weight:600;text-align:center;
+    border:1.5px solid var(--line);border-radius:10px;background:var(--surface);
+    color:var(--ink);font-variant-numeric:tabular-nums;
+  }
+  .field input:focus{outline:2px solid var(--teal);outline-offset:1px;border-color:var(--teal)}
+  .field .hint{font-size:11.5px;color:var(--ink-soft);text-align:center;margin-top:3px}
+  .btn{
+    appearance:none;border:none;cursor:pointer;border-radius:10px;
+    font-family:inherit;font-weight:800;font-size:16px;padding:13px 18px;
+    background:var(--teal);color:#fff;width:100%;margin-top:14px;
+  }
+  .btn:disabled{opacity:.45;cursor:default}
+  .form-err{color:var(--danger);font-size:14px;font-weight:600;margin:10px 0 0;min-height:1.2em}
+
+  /* Pickleball tap-to-rank */
+  .tap-hint{font-size:14px;color:var(--ink-soft);margin:0 0 10px}
+  .chips{display:flex;flex-wrap:wrap;gap:8px}
+  .chip{
+    appearance:none;cursor:pointer;font-family:inherit;font-weight:700;font-size:16px;
+    padding:11px 18px;border-radius:999px;border:1.5px solid var(--pink);
+    background:var(--surface);color:var(--pink);
+  }
+  .chip.placed{opacity:.35;border-style:dashed;cursor:default}
+  .order-list{margin:14px 0 0;padding:0;list-style:none}
+  .order-list li{
+    display:flex;align-items:center;gap:10px;padding:8px 10px;border:1px solid var(--line);
+    border-radius:10px;margin-bottom:6px;background:var(--surface-2);font-weight:700;
+  }
+  .order-list .pos{
+    font-family:"Bricolage Grotesque",sans-serif;font-weight:800;font-size:13px;
+    background:var(--pink);color:#fff;border-radius:6px;padding:3px 8px;min-width:38px;text-align:center;
+  }
+  .order-list .undo{margin-left:auto}
+
+  /* ---------- History ---------- */
+  .history{margin-top:14px}
+  .hrow{
+    display:flex;gap:10px;align-items:flex-start;padding:10px 2px;border-bottom:1px dashed var(--line);
+  }
+  .hrow:last-child{border-bottom:none}
+  .hrow .h-title{font-weight:800;font-size:14px;white-space:nowrap;padding-top:1px}
+  .hrow .h-title .h-date{display:block;font-weight:600;font-size:12px;color:var(--pink);white-space:normal}
+  .hrow .h-body{flex:1;font-size:14.5px;color:var(--ink-soft)}
+  .hrow .h-body b{color:var(--ink)}
+  .del{
+    appearance:none;border:none;background:none;cursor:pointer;color:var(--danger);
+    font-family:inherit;font-size:13px;font-weight:700;padding:4px 2px;white-space:nowrap;
+  }
+  .hrow.tappable{cursor:pointer;border-radius:8px}
+  .hrow.tappable:hover{background:var(--surface-2)}
+  .edit-box{
+    border:1.5px solid var(--teal);border-radius:10px;padding:12px;margin:8px 0 10px;
+    background:var(--surface);
+  }
+  .edit-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+  .btn.inline{width:auto;margin-top:0;padding:11px 18px;font-size:15px}
+  .btn.ghost2{background:var(--surface);color:var(--ink-soft);border:1.5px solid var(--line)}
+  .btn.dangerb{background:var(--danger)}
+  /* Day-level actions live at the BOTTOM of a section, under the open
+     date tab's content — the tab row at the top stays clean. */
+  .daybar{margin-top:16px;border-top:1px solid var(--line);padding-top:14px}
+  .daybar:empty{display:none;border:none;margin:0;padding:0}
+  .edit-day-btn{
+    appearance:none;cursor:pointer;font-family:inherit;font-weight:800;font-size:14.5px;
+    width:100%;padding:12px;border-radius:10px;border:1.5px solid var(--line);
+    background:var(--surface-2);color:var(--ink);
+  }
+  .day-actions{
+    margin-top:10px;background:var(--surface-2);border:1px solid var(--line);
+    border-radius:10px;padding:12px 14px;
+  }
+  .day-actions p{margin:0 0 10px;font-size:14px;color:var(--ink-soft)}
+  .day-actions p b{color:var(--ink)}
+  .settle-box{
+    margin-top:12px;background:var(--purple-soft);border-radius:10px;padding:11px 13px;font-size:14px;
+  }
+  .settle-box .st{font-weight:800;font-size:13px;letter-spacing:.05em;text-transform:uppercase;color:var(--purple);margin-bottom:4px}
+  .settle-box .sline{color:var(--ink-soft)}
+  .settle-box .sline b{color:var(--ink)}
+  .mini-totals{
+    margin-top:12px;padding-top:12px;border-top:1px solid var(--line);
+    display:grid;grid-template-columns:repeat(2,1fr);gap:6px 16px;font-size:14.5px;
+  }
+  @media (min-width:560px){ .mini-totals{grid-template-columns:repeat(4,1fr)} }
+  .mini-totals .mt b{display:block;font-size:17px}
+  .mini-totals .mt span{color:var(--ink-soft);font-size:12.5px}
+  .none-yet{color:var(--ink-soft);font-size:14.5px;padding:6px 0 0}
+
+  /* ---------- Per-event standings: ranked rows with Olympic points ---------- */
+  .ev-stand{border:1px solid var(--line);border-radius:10px;overflow:hidden;margin-bottom:14px}
+  .ev-stand .es-cap{
+    padding:8px 12px;background:var(--surface-2);border-bottom:1px solid var(--line);
+    font-size:11.5px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-soft);
+  }
+  .es-row{
+    display:grid;grid-template-columns:40px 32px 1fr auto;gap:9px;align-items:center;
+    padding:8px 12px;border-bottom:1px dashed var(--line);
+  }
+  .es-row:last-child{border-bottom:none}
+  .es-row .es-name{font-weight:800;font-size:16.5px;line-height:1.15}
+  .es-row .es-det{font-size:12.5px;color:var(--ink-soft);margin-top:1px}
+  .es-row .es-pts{text-align:right}
+  .es-row .es-pts .big{
+    font-family:"Bricolage Grotesque",sans-serif;font-size:24px;font-weight:800;line-height:1;
+    font-variant-numeric:tabular-nums;
+  }
+  .es-row .es-pts .lbl{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-soft)}
+
+  /* ---------- Event leaders strip: current ranking + points, always visible ---------- */
+  .ev-leaders{
+    display:flex;flex-wrap:wrap;align-items:center;gap:7px 16px;
+    border:1px solid var(--line);border-radius:10px;background:var(--surface-2);
+    padding:10px 12px;margin-bottom:14px;
+  }
+  .ev-leaders .el-cap{
+    font-size:11.5px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-soft);
+  }
+  .ev-leaders .el-item{display:inline-flex;align-items:center;gap:6px;font-weight:800;font-size:15.5px}
+  .ev-leaders .el-item .avatar.sm{margin-right:0}
+  .ev-leaders .el-rank{width:26px;height:26px;font-size:13.5px;border-width:1.5px;flex:0 0 auto}
+  .ev-leaders .el-pts{
+    font-family:"Bricolage Grotesque",sans-serif;font-size:19px;font-weight:800;
+    font-variant-numeric:tabular-nums;
+  }
+  .ev-leaders .el-note{
+    font-size:11.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-soft);
+  }
+
+  /* ---------- Footer ---------- */
+  .palm-foot{text-align:center;margin-top:26px;opacity:.75}
+
+  /* ---------- Phone: everything reads bigger ---------- */
+  @media (max-width:600px){
+    body{font-size:17.5px}
+    .wrap{padding:0 12px 56px}
+    .masthead{margin:0 -12px;padding:30px 18px 26px}
+    .masthead .where{font-size:13.5px}
+    .sec-head{gap:14px}
+    .sec-head h2{font-size:30px}
+    .sec-head .rule{font-size:15px}
+    .sport-mark{width:56px;height:56px;flex-basis:56px;border-radius:15px}
+    .card{padding:18px 14px}
+    .board-head{grid-template-columns:50px 70px 1fr auto;font-size:12.5px;padding:12px}
+    .board-head.nopic,.zrow.nopic{grid-template-columns:50px 1fr auto}
+    .players-head{font-size:13.5px}
+    .players-row .pl .avatar{width:68px;height:68px}
+    .players-row .pl span{font-size:16.5px}
+    .zone{padding:14px 12px 15px}
+    .zone-tag{font-size:12.5px;padding:4px 11px}
+    .zrow{grid-template-columns:50px 70px 1fr auto;gap:8px}
+    .avatar.lg{width:66px;height:66px}
+    .avatar.md{width:36px;height:36px}
+    .avatar.sm{width:26px;height:26px}
+    .avatar.xs{width:24px;height:24px}
+    .medal{width:46px;height:46px;font-size:20px}
+    .sname{font-size:23px}
+    .sdetail{font-size:14.5px;line-height:1.5}
+    .spts{min-width:98px;padding-left:10px}
+    .spts .big{font-size:42px}
+    .spts .lbl{font-size:12px}
+    .spts .pay{font-size:16px}
+    .ev-tabs{gap:8px}
+    .ev-tabs .day-tab{font-size:15.5px;padding:10px 15px}
+    .day-tab{font-size:16.5px;padding:12px 18px}
+    .sheet-date-line{font-size:15px}
+    .field label{font-size:14.5px}
+    .field input{font-size:21px;padding:15px 10px}
+    .btn{font-size:18px;padding:16px 18px}
+    .btn.inline{font-size:16.5px;padding:13px 20px}
+    .chip{font-size:18px;padding:13px 20px}
+    .order-list li{font-size:16.5px;padding:10px 12px}
+    .hrow .h-title{font-size:15.5px}
+    .hrow .h-body{font-size:16px}
+    .del{font-size:14.5px}
+    .edit-day-btn{font-size:16px;padding:14px}
+    .day-actions p{font-size:15.5px}
+    .es-row{grid-template-columns:48px 38px 1fr auto;padding:10px}
+    .es-row .es-name{font-size:19px}
+    .es-row .es-det{font-size:14px}
+    .es-row .es-pts .big{font-size:29px}
+    .es-row .es-pts .lbl{font-size:11px}
+    .ev-stand .es-cap{font-size:13px;padding:10px 12px}
+    .ev-leaders{gap:9px 18px;padding:12px}
+    .ev-leaders .el-cap{font-size:13px}
+    .ev-leaders .el-item{font-size:17px}
+    .ev-leaders .el-rank{width:30px;height:30px;font-size:15px}
+    .ev-leaders .el-pts{font-size:22px}
+    .ev-leaders .el-note{font-size:12.5px}
+    .settle-box{font-size:15.5px}
+    .mini-totals{font-size:16px}
+    .mini-totals .mt b{font-size:19px}
+    .none-yet{font-size:16px}
+    .tap-hint{font-size:15.5px}
+    .form-err{font-size:15.5px}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- ============ TOP — masthead + medal scoreboard (scrolls with the page) ============ -->
+  <div>
+  <header class="masthead">
+    <svg class="palm left" width="120" height="110" viewBox="0 0 120 110" aria-hidden="true"><g fill="none" stroke="#06303a" stroke-width="5" stroke-linecap="round"><path d="M38 108 C42 74 46 52 58 34"/><path d="M58 34 C44 18 26 14 10 20"/><path d="M58 34 C56 14 66 4 80 2"/><path d="M58 34 C74 20 92 18 106 26"/><path d="M58 34 C72 34 86 42 94 54"/><path d="M58 34 C44 30 30 34 20 44"/></g><circle cx="52" cy="38" r="6" fill="#06303a"/><circle cx="64" cy="40" r="5" fill="#06303a"/></svg>
+    <svg class="palm right" width="120" height="110" viewBox="0 0 120 110" aria-hidden="true"><g fill="none" stroke="#2a1650" stroke-width="5" stroke-linecap="round"><path d="M38 108 C42 74 46 52 58 34"/><path d="M58 34 C44 18 26 14 10 20"/><path d="M58 34 C56 14 66 4 80 2"/><path d="M58 34 C74 20 92 18 106 26"/><path d="M58 34 C72 34 86 42 94 54"/><path d="M58 34 C44 30 30 34 20 44"/></g><circle cx="52" cy="38" r="6" fill="#2a1650"/><circle cx="64" cy="40" r="5" fill="#2a1650"/></svg>
+    <div class="masthead-inner">
+      <p class="where">Kaanapali · Maui · Hawaii</p>
+      <h1>The Kaanapali Olympics</h1>
+    </div>
+  </header>
+
+  <!-- ============ VIEW TABS — front vs. details ============ -->
+  <nav class="view-tabs" role="tablist" aria-label="Scorekeeper views">
+    <button type="button" class="view-tab active" id="tab-btn-scoreboard" role="tab" aria-selected="true" aria-controls="view-scoreboard" data-viewtab="scoreboard">Scoreboard</button>
+    <button type="button" class="view-tab" id="tab-btn-details" role="tab" aria-selected="false" aria-controls="view-details" data-viewtab="details">Details</button>
+  </nav>
+  <p class="view-note" id="view-note">Front page — the scoreboard plus every event section and entry form. Tap <b>Details</b> for the scoring breakdown behind the totals.</p>
+
+  <div id="view-scoreboard" role="tabpanel" aria-labelledby="tab-btn-scoreboard">
+  <!-- ============ SCOREBOARD — TOTAL POINTS ============ -->
+  <section aria-labelledby="standings-h" class="standings-sec">
+    <div class="sec-head">
+      <h2 id="standings-h">Scoreboard — Total Points</h2>
+    </div>
+    <div class="card race-card" id="standings"></div>
+  </section>
+
+  <!-- ============ EVENT SECTIONS — each carries its own Total + date tabs ============ -->
+  <main id="sheet"></main>
+  </div>
+
+  <div id="view-details" role="tabpanel" aria-labelledby="tab-btn-details" hidden>
+    <section aria-labelledby="details-h" style="margin-top:22px">
+      <div class="sec-head">
+        <h2 id="details-h">Details — All Scoring</h2>
+        <p class="rule">The supporting page for the front scoreboard: how points are awarded, the per-event breakdown behind every total, and every entry that produced it. Scores are entered on the front page — totals are computed once, in plain CPU code, each time a score is entered, edited or removed.</p>
+      </div>
+      <div id="details-root"></div>
+    </section>
+  </div>
+
+  <div class="palm-foot" aria-hidden="true">
+    <svg width="150" height="44" viewBox="0 0 150 44"><g fill="none" stroke="#0e7c86" stroke-width="3" stroke-linecap="round"><path d="M75 43 C76 30 77 22 81 15"/><path d="M81 15 C72 6 60 4 50 8"/><path d="M81 15 C80 5 86 1 95 1"/><path d="M81 15 C91 7 102 6 110 11"/><path d="M81 15 C71 12 62 15 56 21"/></g><circle cx="78" cy="17" r="3.4" fill="#e75480"/><circle cx="85" cy="18" r="2.8" fill="#6d4fa1"/></svg>
+  </div>
+
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  var PLAYERS = ["Jon", "Jane", "Kevin", "Amy"];
+  var PHOTOS = { Jon:"assets/jon.jpg?v=20261025-2", Jane:"assets/jane.jpg?v=20261025-2", Kevin:"assets/kevin.jpg?v=20261025-2", Amy:"assets/amy.jpg?v=20261025-2" };
+  function avatar(p, cls){
+    return '<img class="avatar ' + (cls || "") + '" src="' + PHOTOS[p] + '" alt="Photo of ' + p + '" loading="lazy" />';
+  }
+  var POS_POINTS = [4, 3, 2, 1];
+  var POS_PAY    = [100, 60, 40, 0];
+  var POS_LABEL  = ["1st", "2nd", "3rd", "4th"];
+  var ZONES = [
+    { cls:"gold",   tag:"1st · Gold",   medal:"gold",   label:"1" },
+    { cls:"silver", tag:"2nd · Silver", medal:"silver", label:"2" },
+    { cls:"bronze", tag:"3rd · Bronze", medal:"bronze", label:"3" },
+    { cls:"fourth", tag:"4th",          medal:"none",   label:"4" }
+  ];
+  // Wordle runs every day of the trip: Oct 31 – Nov 7, 2026 (8 days).
+  var WORDLE_FIRST = "2026-10-31", WORDLE_LAST = "2026-11-07";
+
+  var state = { golf: [], pickle: [], cards: [], wordle: [] };
+  // golf:   { pts:{name:n}, date:"YYYY-MM-DD" }
+  // pickle: { order:[names], date }  — Olympic pts settled per day on wins
+  // cards:  { scores:{name:n}, date }
+  // wordle: { tries:{name:1..7}, date }  — 7 = missed
+
+  // Every event section carries its own tab row: "total" first, then one
+  // tab per date. Golf, pickleball and cards use the add-a-date model:
+  // no date tabs exist until "+ Add day" creates one, and removing a day
+  // removes its tab with it. Wordle is the exception — it runs every day
+  // of the trip, so its eight days (Oct 31 – Nov 7) stay pre-built and its
+  // tabs stay even when a day's entry is removed.
+  var PREBUILT_DAYS = ["2026-10-31", "2026-11-01", "2026-11-02", "2026-11-03",
+                       "2026-11-04", "2026-11-05", "2026-11-06", "2026-11-07"];
+  var createdByEvent = {
+    golf: [],
+    pickle: [],
+    cards: [],
+    wordle: PREBUILT_DAYS.slice()
+  };
+  // The tab open inside each event section: "total" or a "YYYY-MM-DD" date.
+  var eventTab = { golf: "total", pickle: "total", cards: "total", wordle: "total" };
+  var EVENTS = ["golf", "pickle", "cards", "wordle"];
+
+  /* ---------- dates ---------- */
+  function todayISO(){
+    var d = new Date();
+    var m = String(d.getMonth()+1).padStart(2,"0"), day = String(d.getDate()).padStart(2,"0");
+    return d.getFullYear() + "-" + m + "-" + day;
+  }
+  function fmtDate(iso){
+    if (!iso) return "";
+    var d = new Date(iso + "T12:00:00");
+    if (isNaN(d)) return "";
+    return d.toLocaleDateString("en-US", { weekday:"short", month:"short", day:"numeric" });
+  }
+  function fmtDateShort(iso){
+    if (!iso) return "Undated";
+    var d = new Date(iso + "T12:00:00");
+    if (isNaN(d)) return "";
+    return d.toLocaleDateString("en-US", { month:"short", day:"numeric" });
+  }
+  function dateTitle(kind, n, date){
+    return kind + " " + n + (date ? '<span class="h-date">' + fmtDate(date) + '</span>' : "");
+  }
+  function el(id){ return document.getElementById(id); }
+
+  /* ---------- scoring helpers ---------- */
+  function rankGroups(scoreMap, higherBetter, keys){
+    var list = (keys || PLAYERS).slice().sort(function(a,b){
+      var d = higherBetter ? scoreMap[b]-scoreMap[a] : scoreMap[a]-scoreMap[b];
+      return d !== 0 ? d : PLAYERS.indexOf(a)-PLAYERS.indexOf(b);
+    });
+    var groups = [], i = 0;
+    while (i < list.length){
+      var j = i;
+      while (j+1 < list.length && scoreMap[list[j+1]] === scoreMap[list[i]]) j++;
+      groups.push({ players: list.slice(i, j+1), start: i });
+      i = j+1;
+    }
+    return groups;
+  }
+  function groupPoints(start, len){
+    var sum = 0;
+    for (var k = 0; k < len; k++) sum += POS_POINTS[start+k] || 0;
+    return Math.max(1, sum / len); // no-zero rule: a participant never banks 0
+  }
+  function blankStats(){
+    var o = {};
+    PLAYERS.forEach(function(p){ o[p] = { olympic:0, wins:0, raw:0 }; });
+    return o;
+  }
+  // Golf / cards / wordle: each entry settles on its own (a wordle entry IS one day).
+  function tallySimple(list, kind){
+    var stats = blankStats();
+    list.forEach(function(entry){
+      var map = kind === "golf" ? entry.pts : kind === "cards" ? entry.scores : entry.tries;
+      var groups = rankGroups(map, kind === "golf");
+      groups.forEach(function(g){
+        var pts = groupPoints(g.start, g.players.length);
+        g.players.forEach(function(p){
+          stats[p].olympic += pts;
+          if (g.start === 0) stats[p].wins += 1;
+          stats[p].raw += map[p];
+        });
+      });
+    });
+    return stats;
+  }
+  // Pickleball: rotations grouped by date; each day ranks players by rotation wins.
+  function pickleDays(){
+    var days = [], byKey = {};
+    state.pickle.forEach(function(entry){
+      var key = entry.date || "";
+      if (!byKey[key]){ byKey[key] = { date:key, entries:[] }; days.push(byKey[key]); }
+      byKey[key].entries.push(entry);
+    });
+    return days.map(function(day){
+      var wins = {}, played = {};
+      PLAYERS.forEach(function(p){ wins[p] = 0; });
+      day.entries.forEach(function(e){
+        e.order.forEach(function(p){ played[p] = true; });
+        wins[e.order[0]] += 1;
+      });
+      var participants = PLAYERS.filter(function(p){ return played[p]; });
+      var groups = rankGroups(wins, true, participants);
+      var awards = {};
+      groups.forEach(function(g){
+        var pts = groupPoints(g.start, g.players.length);
+        g.players.forEach(function(p){ awards[p] = pts; });
+      });
+      return { date: day.date, count: day.entries.length, wins: wins, groups: groups, awards: awards };
+    });
+  }
+  function tallyPickle(){
+    var stats = blankStats();
+    state.pickle.forEach(function(entry){
+      stats[entry.order[0]].wins += 1;              // rotation wins (sport's own tally)
+      PLAYERS.forEach(function(p){ stats[p].raw += 1; });
+    });
+    pickleDays().forEach(function(day){
+      PLAYERS.forEach(function(p){
+        if (day.awards[p] != null) stats[p].olympic += day.awards[p];
+      });
+    });
+    return stats;
+  }
+
+  function fmt(n){
+    if (Math.abs(n - Math.round(n)) < 0.001) return String(Math.round(n));
+    return (Math.round(n*10)/10).toString();
+  }
+  function fmtMoney(n){ return "$" + fmt(n); }
+
+  /* One ranking for an event's stats: players ordered by Olympic points
+     (then wins); players tied on both share a place. */
+  function orderAndRanks(stats){
+    var order = PLAYERS.slice().sort(function(a, b){
+      if (stats[b].olympic !== stats[a].olympic) return stats[b].olympic - stats[a].olympic;
+      if (stats[b].wins !== stats[a].wins) return stats[b].wins - stats[a].wins;
+      return PLAYERS.indexOf(a) - PLAYERS.indexOf(b);
+    });
+    var ranks = {};
+    order.forEach(function(p, i){
+      var prev = order[i - 1];
+      ranks[p] = (i > 0 && stats[p].olympic === stats[prev].olympic && stats[p].wins === stats[prev].wins)
+        ? ranks[prev] : i;
+    });
+    return { order: order, ranks: ranks };
+  }
+
+  /* Current leader ranking for one event: every player ranked by that
+     event's Olympic points with the score alongside — shown at the top of
+     each event section, whatever tab is open, even before any score lands. */
+  function eventStats(kind){
+    if (kind === "pickle") return tallyPickle();
+    return tallySimple(state[kind], kind);
+  }
+  function leadersHTML(kind){
+    var stats = eventStats(kind);
+    var or = orderAndRanks(stats);
+    var items = or.order.map(function(p){
+      var z = ZONES[Math.min(or.ranks[p], 3)];
+      return '<span class="el-item"><span class="medal ' + z.medal + ' el-rank">' + (or.ranks[p] + 1) + '</span>' +
+        avatar(p, "sm") + p + ' <span class="el-pts">' + fmt(stats[p].olympic) + '</span></span>';
+    }).join("");
+    return '<span class="el-cap">' + (state[kind].length ? "Leaders" : "Leaders — no scores yet") + '</span>' +
+      items + '<span class="el-note">pts in this event</span>';
+  }
+  function paintLeaders(kind){
+    var n = el("leaders-" + kind);
+    if (n) n.innerHTML = leadersHTML(kind);
+  }
+
+  /* Ranked standings for one event: players ordered by Olympic points
+     (then wins; full ties share a place), each row showing the place,
+     the player, a detail line, and that player's points. */
+  function standingsHTML(stats, caption, detailFn){
+    var or = orderAndRanks(stats);
+    var order = or.order, ranks = or.ranks;
+    return '<div class="ev-stand"><div class="es-cap">' + caption + '</div>' +
+      order.map(function(p){
+        var z = ZONES[Math.min(ranks[p], 3)];
+        return '<div class="es-row"><div class="medal ' + z.medal + '">' + (ranks[p] + 1) + '</div>' +
+          avatar(p, "md") +
+          '<div><div class="es-name">' + p + '</div><div class="es-det">' + detailFn(p, stats[p]) + '</div></div>' +
+          '<div class="es-pts"><div class="big">' + fmt(stats[p].olympic) + '</div><div class="lbl">Olympic pts</div></div></div>';
+      }).join("") + '</div>';
+  }
+
+  /* ---------- standings: Race to Gold zones ---------- */
+  function computeStandings(){
+    var g = tallySimple(state.golf, "golf");
+    var p = tallyPickle();
+    var c = tallySimple(state.cards, "cards");
+    var w = tallySimple(state.wordle, "wordle");
+    var rows = PLAYERS.map(function(name){
+      return {
+        name: name,
+        olympic: g[name].olympic + p[name].olympic + c[name].olympic + w[name].olympic,
+        wins: g[name].wins + p[name].wins + c[name].wins + w[name].wins,
+        golfO: g[name].olympic, pickleO: p[name].olympic, cardsO: c[name].olympic, wordleO: w[name].olympic
+      };
+    });
+    rows.sort(function(a,b){
+      if (b.olympic !== a.olympic) return b.olympic - a.olympic;
+      if (b.wins !== a.wins) return b.wins - a.wins;
+      return PLAYERS.indexOf(a.name) - PLAYERS.indexOf(b.name);
+    });
+    var rank = 0;
+    rows.forEach(function(r, i){
+      if (i === 0 || r.olympic !== rows[i-1].olympic || r.wins !== rows[i-1].wins) rank = i;
+      r.rank = rank;
+    });
+    rows.forEach(function(r){
+      var tied = rows.filter(function(x){ return x.rank === r.rank; });
+      var sum = 0;
+      for (var k = 0; k < tied.length; k++) sum += POS_PAY[r.rank + k] || 0;
+      r.pay = sum / tied.length;
+    });
+    return rows;
+  }
+
+  var standingsEl = el("standings");
+  function renderStandings(){
+    var rows = computeStandings();
+    var anyPlayed = state.golf.length + state.pickle.length + state.cards.length + state.wordle.length > 0;
+    var playersBlock = '<div class="players-head">Players:</div><div class="players-row">' +
+      PLAYERS.map(function(p){
+        return '<div class="pl">' + avatar(p, "lg") + '<span>' + p + '</span></div>';
+      }).join("") + '</div>';
+    if (!anyPlayed){
+      // Starting grid: the medal zones sit open and empty — nobody is seated
+      // until real scores place them there. The four players live in the
+      // Players roster above; zone payout labels still show.
+      var head0 = '<div class="board-head nopic"><span>Place</span><span>Player</span><span class="bh-total">Payout</span></div>';
+      standingsEl.innerHTML = playersBlock + head0 + ZONES.map(function(z, i){
+        var pay0 = POS_PAY[i] > 0
+          ? '<div class="pay">' + fmtMoney(POS_PAY[i]) + ' payout</div>'
+          : '<div class="pay none">deals the cards</div>';
+        return '<div class="zone ' + z.cls + '"><span class="zone-tag">' + z.tag + '</span>' +
+          '<div class="zrow nopic">' +
+          '<div class="medal ' + z.medal + '">' + z.label + '</div>' +
+          '<div><div class="sname open-slot">Open — no scores yet</div></div>' +
+          '<div class="spts">' + pay0 + '</div>' +
+          '</div></div>';
+      }).join("");
+      return;
+    }
+    var head = '<div class="board-head"><span>Place</span><span></span><span>Player</span><span class="bh-total">Total pts</span></div>';
+    standingsEl.innerHTML = playersBlock + head + rows.map(function(r, i){
+      var z = ZONES[Math.min(r.rank, 3)];
+      var pay = r.pay > 0
+        ? '<div class="pay">' + fmtMoney(r.pay) + ' payout</div>'
+        : '<div class="pay none">deals the cards</div>';
+      return '<div class="zone ' + z.cls + '"><span class="zone-tag">' + z.tag + '</span>' +
+        '<div class="zrow">' +
+        '<div class="medal ' + z.medal + '">' + (i + 1) + '</div>' +
+        avatar(r.name, "lg") +
+        '<div><div class="sname">' + r.name + '</div>' +
+        '<div class="sdetail">' + r.wins + (r.wins === 1 ? ' event win' : ' event wins') +
+        ' · Golf ' + fmt(r.golfO) + ' · Pickleball ' + fmt(r.pickleO) + ' · Cards ' + fmt(r.cardsO) + ' · Wordle ' + fmt(r.wordleO) + '</div></div>' +
+        '<div class="spts"><div class="big">' + fmt(r.olympic) + '</div><div class="lbl">Total pts</div>' + pay + '</div>' +
+        '</div></div>';
+    }).join("");
+  }
+
+  /* ---------- shared form builders ---------- */
+  function buildInputs(containerId, prefix, hint){
+    var c = el(containerId);
+    if (!c) return;
+    c.innerHTML = PLAYERS.map(function(p){
+      return '<div class="field"><label for="' + prefix + '-' + p + '">' + avatar(p, "sm") + p + '</label>' +
+        '<input id="' + prefix + '-' + p + '" inputmode="numeric" pattern="[0-9]*" autocomplete="off" placeholder="0" />' +
+        (hint ? '<div class="hint">' + hint + '</div>' : '') + '</div>';
+    }).join("");
+  }
+  function readScores(prefix, errEl, min, max, rangeMsg){
+    var out = {}, bad = null, outOfRange = null;
+    PLAYERS.forEach(function(p){
+      var v = el(prefix + "-" + p).value.trim();
+      if (v === "" || isNaN(Number(v))) bad = p;
+      else {
+        out[p] = Number(v);
+        if (min != null && (out[p] < min || out[p] > max)) outOfRange = p;
+      }
+    });
+    if (bad){
+      errEl.textContent = "Enter a number for all four players — " + bad + " is missing.";
+      return null;
+    }
+    if (outOfRange){
+      errEl.textContent = rangeMsg + " — check " + outOfRange + ".";
+      return null;
+    }
+    errEl.textContent = "";
+    return out;
+  }
+  function clearInputs(prefix){
+    PLAYERS.forEach(function(p){
+      var n = el(prefix + "-" + p);
+      if (n) n.value = "";
+    });
+  }
+  function describeFinish(groups, map, suffix, formatVal){
+    return groups.map(function(g){
+      var label = POS_LABEL[g.start] + (g.players.length > 1 ? " (tie)" : "");
+      var names = g.players.map(function(p){
+        var v = map ? (formatVal ? formatVal(map[p]) : fmt(map[p])) : "";
+        return avatar(p, "xs") + "<b>" + p + "</b>" + (map ? " " + v : "");
+      }).join(", ");
+      return label + ": " + names;
+    }).join(" · ") + (suffix || "");
+  }
+  function entriesOn(list, date){
+    var out = [];
+    list.forEach(function(e, i){
+      if ((e.date || "") === date) out.push({ entry: e, index: i });
+    });
+    return out;
+  }
+
+  /* ---------- event section shells ---------- */
+  var ICONS = {
+    golf:   '<img src="assets/icon-golf.jpg?v=20261025-3" alt="" />',
+    pickle: '<img src="assets/icon-pickle.jpg?v=20261025-4" alt="" />',
+    cards:  '<img src="assets/icon-cards.jpg?v=20261025-4" alt="" />',
+    wordle: '<img src="assets/icon-wordle.jpg?v=20261025-3" alt="" />'
+  };
+  var EVENT_META = {
+    golf:   { mark:"golf",   title:"Golf — points games",       rule:"Enter the points each player earned in the round. Most points wins the round." },
+    pickle: { mark:"pickle", title:"Pickleball — round robin",  rule:"Enter each rotation as you play it. Olympic points settle at the end of each day: the day's wins leader takes 4, then 3 · 2 · 1 down the wins table — ties in wins split the points." },
+    cards:  { mark:"cards",  title:"Cards — Golf",              rule:"Enter each player's score for the game. Lowest score wins — just like the name says." },
+    wordle: { mark:"wordle", title:"Wordle — daily",            rule:"One Wordle a day. Enter how many tries each player took — fewest tries wins the day. Missed it entirely? Enter 7 and it ranks last, but still earns a point." }
+  };
+  function secHead(kind){
+    var m = EVENT_META[kind];
+    return '<div class="sec-head"><span class="sport-mark ' + m.mark + '" aria-hidden="true">' + ICONS[kind] + '</span>' +
+      '<h2>' + m.title + '</h2><p class="rule">' + m.rule + '</p></div>';
+  }
+
+  /* ================================================================
+     EVENT SECTIONS — each event gets its own section with a small tab
+     row across the top: Total first, then one tab per date. Below the
+     tabs sits ONLY the active tab's content — the Total rollup, or the
+     selected date's entry form + that date's recap. No date list is
+     ever rendered under the tabs.
+     ================================================================ */
+  function datesFor(kind){
+    var seen = {}, out = [];
+    function add(d){
+      d = d || "";
+      if (d && !(d in seen)){ seen[d] = true; out.push(d); }
+    }
+    createdByEvent[kind].forEach(add);
+    state[kind].forEach(function(e){ add(e.date); });
+    out.sort();
+    return out;
+  }
+  function wordleEntryOn(date){
+    return state.wordle.some(function(e){ return e.date === date; });
+  }
+  function sectionHTML(kind){
+    var pop = kind === "wordle" ? "" :
+      '<div class="add-day-pop" id="pop-' + kind + '" hidden>' +
+      '<label for="pop-date-' + kind + '">New date</label>' +
+      '<input type="date" id="pop-date-' + kind + '" />' +
+      '<button type="button" class="pop-btn" data-addconfirm="' + kind + '">Add day</button>' +
+      '<button type="button" class="pop-btn ghost" data-addcancel="' + kind + '">Cancel</button></div>';
+    return '<section aria-label="' + EVENT_META[kind].title + '">' + secHead(kind) +
+      '<div class="card"><div class="ev-leaders" id="leaders-' + kind + '"></div>' +
+      '<div class="ev-tabs" id="tabs-' + kind + '" role="tablist"></div>' + pop +
+      '<div id="content-' + kind + '"></div><div class="daybar" id="daybar-' + kind + '"></div></div></section>';
+  }
+  function totalContentHTML(kind){
+    var line = kind === "wordle"
+      ? '<p class="sheet-date-line">Event standings — every date rolled up, ranked by Olympic points. Tap a date tab above to enter that day\'s scores, or tap an entry below to edit it.</p>'
+      : '<p class="sheet-date-line">Event standings — every date rolled up, ranked by Olympic points. Tap + Add day to add a date and enter that day\'s scores, or tap an entry below to edit it.</p>';
+    if (kind === "golf")
+      return line + '<div id="golf-standings"></div><div class="history" id="golf-history" style="margin-top:0"></div>';
+    if (kind === "pickle")
+      return line + '<div id="pickle-standings"></div><div class="history" id="pickle-history" style="margin-top:0"></div><div id="pickle-settle"></div>';
+    if (kind === "cards")
+      return line + '<div id="cards-standings"></div><div class="history" id="cards-history" style="margin-top:0"></div>';
+    return line + '<div id="wordle-standings"></div><div class="history" id="wordle-history" style="margin-top:0"></div>';
+  }
+  function dateContentHTML(kind, date){
+    var label = fmtDate(date);
+    if (kind === "golf"){
+      return '<p class="sheet-date-line">Scoring for <b>' + label + '</b> — rounds posted here stay on this date. Tap an entry below to edit it.</p>' +
+        '<form id="golf-form" novalidate><div class="score-grid" id="golf-inputs"></div>' +
+        '<p class="form-err" id="golf-err"></p>' +
+        '<button class="btn" type="submit">Record golf round</button></form>' +
+        '<div class="history" id="d-golf-history"></div><div id="d-golf-standings"></div>';
+    }
+    if (kind === "pickle"){
+      return '<p class="sheet-date-line">Scoring for <b>' + label + '</b> — rotations on this date settle together. Tap a rotation below to edit it.</p>' +
+        '<p class="tap-hint">Tap a name to place them — first tap takes 1st, next takes 2nd, and so on.</p>' +
+        '<div class="chips" id="pickle-chips"></div>' +
+        '<ol class="order-list" id="pickle-order"></ol>' +
+        '<p class="form-err" id="pickle-err"></p>' +
+        '<button class="btn" id="pickle-record" type="button" disabled>Record rotation</button>' +
+        '<div class="history" id="d-pickle-history"></div><div id="d-pickle-settle"></div><div id="d-pickle-standings"></div>';
+    }
+    if (kind === "cards"){
+      return '<p class="sheet-date-line">Scoring for <b>' + label + '</b> — games posted here stay on this date. Tap an entry below to edit it.</p>' +
+        '<form id="cards-form" novalidate><div class="score-grid" id="cards-inputs"></div>' +
+        '<p class="form-err" id="cards-err"></p>' +
+        '<button class="btn" type="submit">Record card game</button></form>' +
+        '<div class="history" id="d-cards-history"></div><div id="d-cards-standings"></div>';
+    }
+    // Wordle: one entry per day — once posted, the tab shows the recap and
+    // the entry can be removed to change it.
+    if (wordleEntryOn(date)){
+      return '<p class="sheet-date-line">Wordle for <b>' + label + '</b> is posted — tap the entry below to edit it.</p>' +
+        '<div class="history" id="d-wordle-history" style="margin-top:0"></div><div id="d-wordle-standings"></div>';
+    }
+    return '<p class="sheet-date-line">Scoring for <b>' + label + '</b> — one Wordle per day.</p>' +
+      '<form id="wordle-form" novalidate><div class="score-grid" id="wordle-inputs"></div>' +
+      '<p class="form-err" id="wordle-err"></p>' +
+      '<button class="btn" type="submit">Record Wordle</button></form>' +
+      '<div class="history" id="d-wordle-history"></div><div id="d-wordle-standings"></div>';
+  }
+  function paintEvTabs(kind){
+    var t = el("tabs-" + kind);
+    if (!t) return;
+    var dates = datesFor(kind);
+    if (eventTab[kind] !== "total" && dates.indexOf(eventTab[kind]) < 0) eventTab[kind] = "total";
+    var html = '<button type="button" class="day-tab' + (eventTab[kind] === "total" ? " active" : "") +
+      '" data-evtab="total" data-kind="' + kind + '">Total</button>';
+    dates.forEach(function(d){
+      html += '<button type="button" class="day-tab' + (eventTab[kind] === d ? " active" : "") +
+        '" data-evtab="' + d + '" data-kind="' + kind + '">' + fmtDateShort(d) + '</button>';
+    });
+    if (kind !== "wordle"){
+      html += '<button type="button" class="day-tab add-day" data-addday="' + kind + '">+ Add day</button>';
+    }
+    t.innerHTML = html;
+  }
+  function paintEvent(kind){
+    paintLeaders(kind);
+    paintEvTabs(kind);
+    var c = el("content-" + kind);
+    if (!c) return;
+    var tab = eventTab[kind];
+    if (tab === "total"){
+      c.innerHTML = totalContentHTML(kind);
+      if (kind === "golf") renderGolf();
+      else if (kind === "pickle") renderPickle();
+      else if (kind === "cards") renderCards();
+      else renderWordle();
+    } else {
+      c.innerHTML = dateContentHTML(kind, tab);
+      if (kind === "golf"){ buildInputs("golf-inputs", "golf", ""); paintDayGolf(tab); }
+      else if (kind === "pickle"){ renderPickleEntry(); paintDayPickle(tab); }
+      else if (kind === "cards"){ buildInputs("cards-inputs", "cards", ""); paintDayCards(tab); }
+      else { buildInputs("wordle-inputs", "wordle", "tries 1–6 · 7 = missed"); paintDayWordle(tab); }
+    }
+    if (editing && editing.kind === "pickle") renderEditPickle();
+    paintDayBar(kind);
+  }
+
+  /* ---------- tap-an-entry-to-edit ---------- */
+  var editing = null;   // { kind, index } — the entry currently open for editing
+  var editOrder = [];   // pickleball edit widget: names in finishing order
+  function editFormHTML(kind, entry){
+    if (kind === "pickle"){
+      return '<div class="edit-box"><p class="tap-hint">Editing this rotation — tap the names in finishing order, then Save.</p>' +
+        '<div class="chips" id="ed-pickle-chips"></div><ol class="order-list" id="ed-pickle-order"></ol>' +
+        '<div class="edit-actions">' +
+        '<button type="button" class="btn inline" id="ed-pickle-save" disabled>Save changes</button>' +
+        '<button type="button" class="btn inline ghost2" data-editcancel="1">Cancel</button></div></div>';
+    }
+    var map = kind === "golf" ? entry.pts : kind === "cards" ? entry.scores : entry.tries;
+    var fields = PLAYERS.map(function(p){
+      return '<div class="field"><label for="ed-' + kind + '-' + p + '">' + avatar(p, "sm") + p + '</label>' +
+        '<input id="ed-' + kind + '-' + p + '" inputmode="numeric" pattern="[0-9]*" autocomplete="off" value="' + map[p] + '" /></div>';
+    }).join("");
+    return '<div class="edit-box"><div class="score-grid">' + fields + '</div>' +
+      '<p class="form-err" id="ed-' + kind + '-err"></p>' +
+      '<div class="edit-actions">' +
+      '<button type="button" class="btn inline" data-editsave="' + kind + '">Save changes</button>' +
+      '<button type="button" class="btn inline ghost2" data-editcancel="1">Cancel</button></div></div>';
+  }
+  function renderEditPickle(){
+    var chipsEl = el("ed-pickle-chips"), orderEl = el("ed-pickle-order"), btn = el("ed-pickle-save");
+    if (!chipsEl || !orderEl || !btn) return;
+    chipsEl.innerHTML = PLAYERS.map(function(p){
+      var placed = editOrder.indexOf(p) >= 0;
+      return '<button type="button" class="chip' + (placed ? ' placed' : '') + '" data-editchip="' + p + '"' +
+        (placed ? ' disabled' : '') + '>' + avatar(p, "sm") + p + '</button>';
+    }).join("");
+    orderEl.innerHTML = editOrder.map(function(p, i){
+      var undo = i === editOrder.length - 1
+        ? '<button type="button" class="del undo" id="ed-pickle-undo">Undo</button>' : '';
+      return '<li><span class="pos">' + POS_LABEL[i] + '</span> ' + avatar(p, "sm") + p + undo + '</li>';
+    }).join("");
+    btn.disabled = editOrder.length !== 4;
+  }
+  function saveEdit(kind){
+    if (!editing || editing.kind !== kind) return;
+    var idx = editing.index, old = state[kind][idx];
+    if (!old){ editing = null; renderAll(true); return; }
+    if (kind === "golf"){
+      var pts = readScores("ed-golf", el("ed-golf-err"));
+      if (!pts) return;
+      state.golf[idx] = { pts: pts, date: old.date };
+    } else if (kind === "cards"){
+      var scores = readScores("ed-cards", el("ed-cards-err"));
+      if (!scores) return;
+      state.cards[idx] = { scores: scores, date: old.date };
+    } else if (kind === "wordle"){
+      var tries = readScores("ed-wordle", el("ed-wordle-err"), 1, 7, "Wordle tries run 1–6, with 7 for a miss");
+      if (!tries) return;
+      state.wordle[idx] = { tries: tries, date: old.date };
+    } else {
+      return;
+    }
+    editing = null;
+    renderAll(true);
+  }
+
+  /* ---------- "Edit day": day-level actions at the BOTTOM of a section ---------- */
+  function paintDayBar(kind){
+    var bar = el("daybar-" + kind);
+    if (!bar) return;
+    var tab = eventTab[kind];
+    if (tab === "total"){ bar.innerHTML = ""; return; }
+    var n = entriesOn(state[kind], tab).length;
+    var countTxt = n === 0 ? "No entries on this date yet." :
+      n + (n === 1 ? " entry sits" : " entries sit") + " on this date in this event.";
+    var isTripDay = kind === "wordle" && PREBUILT_DAYS.indexOf(tab) >= 0;
+    var note = isTripDay
+      ? "Remove this day clears every score posted here. The date tab itself stays — all eight trip days are built in, ready for corrected scores."
+      : "Remove this day clears every one of those entries, and the date tab goes with it.";
+    bar.innerHTML =
+      '<button type="button" class="edit-day-btn" data-editday="' + kind + '">Edit day — ' + fmtDate(tab) + '</button>' +
+      '<div class="day-actions" id="dayactions-' + kind + '" hidden>' +
+      '<p><b>' + fmtDate(tab) + '</b> · ' + countTxt + ' ' + note + '</p>' +
+      '<div class="edit-actions" style="margin-top:0">' +
+      '<button type="button" class="btn inline dangerb" data-removeday="' + kind + '">Remove this day</button>' +
+      '<button type="button" class="btn inline ghost2" data-daycancel="' + kind + '">Cancel</button>' +
+      '</div></div>';
+  }
+  function removeDay(kind){
+    var tab = eventTab[kind];
+    if (tab === "total") return;
+    state[kind] = state[kind].filter(function(e){ return (e.date || "") !== tab; });
+    // Wordle's trip days (Oct 31 – Nov 7) are built in: their tab stays,
+    // cleared and ready for corrected scores. Golf, pickleball and cards
+    // use the add-a-date model — removing a day removes its tab with it
+    // and the view returns to Total.
+    if (!(kind === "wordle" && PREBUILT_DAYS.indexOf(tab) >= 0)){
+      var ci = createdByEvent[kind].indexOf(tab);
+      if (ci >= 0) createdByEvent[kind].splice(ci, 1);
+      eventTab[kind] = "total";
+    }
+    editing = null;
+    renderAll(true);
+  }
+
+  function renderGolf(){
+    var hist = el("golf-history"), stand = el("golf-standings");
+    if (!hist) return;
+    if (!state.golf.length){
+      hist.innerHTML = '<p class="none-yet">No rounds recorded yet — tap + Add day to add a date and enter that day\'s scores.</p>';
+      stand.innerHTML = "";
+      return;
+    }
+    hist.innerHTML = state.golf.map(function(entry, i){
+      if (editing && editing.kind === "golf" && editing.index === i) return editFormHTML("golf", entry);
+      var groups = rankGroups(entry.pts, true);
+      return '<div class="hrow tappable" data-editrow="golf" data-idx="' + i + '"><span class="h-title">' + dateTitle("Round", i+1, entry.date) + '</span>' +
+        '<span class="h-body">' + describeFinish(groups, entry.pts, " pts") + '</span>' +
+        '<button class="del" type="button" data-del-golf="' + i + '">Remove</button></div>';
+    }).join("");
+    var stats = tallySimple(state.golf, "golf");
+    stand.innerHTML = standingsHTML(stats, "Golf standings — all dates", function(p, s){
+      return s.wins + (s.wins === 1 ? " round win" : " round wins") + " · " + fmt(s.raw) + " raw pts";
+    });
+  }
+
+  function renderCards(){
+    var hist = el("cards-history"), stand = el("cards-standings");
+    if (!hist) return;
+    if (!state.cards.length){
+      hist.innerHTML = '<p class="none-yet">No games recorded yet — tap + Add day to add a date and enter that day\'s scores.</p>';
+      stand.innerHTML = "";
+      return;
+    }
+    hist.innerHTML = state.cards.map(function(entry, i){
+      if (editing && editing.kind === "cards" && editing.index === i) return editFormHTML("cards", entry);
+      var groups = rankGroups(entry.scores, false);
+      return '<div class="hrow tappable" data-editrow="cards" data-idx="' + i + '"><span class="h-title">' + dateTitle("Game", i+1, entry.date) + '</span>' +
+        '<span class="h-body">' + describeFinish(groups, entry.scores, "") + '</span>' +
+        '<button class="del" type="button" data-del-cards="' + i + '">Remove</button></div>';
+    }).join("");
+    var stats = tallySimple(state.cards, "cards");
+    stand.innerHTML = standingsHTML(stats, "Cards standings — all dates", function(p, s){
+      return s.wins + (s.wins === 1 ? " game win" : " game wins") + " · " + fmt(s.raw) + " total score";
+    });
+  }
+
+  function renderWordle(){
+    var hist = el("wordle-history"), stand = el("wordle-standings");
+    if (!hist) return;
+    if (!state.wordle.length){
+      hist.innerHTML = '<p class="none-yet">No Wordles recorded yet — tap a date tab above to post each day\'s.</p>';
+      stand.innerHTML = "";
+      return;
+    }
+    hist.innerHTML = state.wordle.map(function(entry, i){
+      if (editing && editing.kind === "wordle" && editing.index === i) return editFormHTML("wordle", entry);
+      var groups = rankGroups(entry.tries, false);
+      var body = describeFinish(groups, entry.tries, "", function(v){ return v === 7 ? "miss" : v + (v === 1 ? " try" : " tries"); });
+      return '<div class="hrow tappable" data-editrow="wordle" data-idx="' + i + '"><span class="h-title">' + dateTitle("Day", i+1, entry.date) + '</span>' +
+        '<span class="h-body">' + body + '</span>' +
+        '<button class="del" type="button" data-del-wordle="' + i + '">Remove</button></div>';
+    }).join("");
+    var stats = tallySimple(state.wordle, "wordle");
+    var days = state.wordle.length;
+    stand.innerHTML = standingsHTML(stats, "Wordle standings — all dates", function(p, s){
+      var avg = days ? (Math.round((s.raw / days) * 10) / 10) : 0;
+      return s.wins + (s.wins === 1 ? " day win" : " day wins") + " · " + avg + " avg tries";
+    });
+  }
+
+  function renderPickle(){
+    var hist = el("pickle-history"), settle = el("pickle-settle"), stand = el("pickle-standings");
+    if (!hist) return;
+    if (!state.pickle.length){
+      hist.innerHTML = '<p class="none-yet">No rotations recorded yet — tap + Add day to add a date and enter that day\'s rotations.</p>';
+      settle.innerHTML = "";
+      stand.innerHTML = "";
+      return;
+    }
+    hist.innerHTML = state.pickle.map(function(entry, i){
+      if (editing && editing.kind === "pickle" && editing.index === i) return editFormHTML("pickle", entry);
+      var body = entry.order.map(function(p, k){
+        return POS_LABEL[k] + ": " + avatar(p, "xs") + "<b>" + p + "</b>";
+      }).join(" · ");
+      return '<div class="hrow tappable" data-editrow="pickle" data-idx="' + i + '"><span class="h-title">' + dateTitle("Rotation", i+1, entry.date) + '</span>' +
+        '<span class="h-body">' + body + '</span>' +
+        '<button class="del" type="button" data-del-pickle="' + i + '">Remove</button></div>';
+    }).join("");
+    var days = pickleDays();
+    settle.innerHTML = '<div class="settle-box"><div class="st">Daily settlements — Olympic points</div>' +
+      days.map(function(day){
+        var label = day.date ? fmtDate(day.date) : "Undated day";
+        var line = day.groups.map(function(g){
+          var pts = day.awards[g.players[0]];
+          var names = g.players.map(function(p){
+            return avatar(p, "xs") + "<b>" + p + "</b> (" + day.wins[p] + (day.wins[p] === 1 ? " win" : " wins") + ")";
+          }).join(", ");
+          return POS_LABEL[g.start] + (g.players.length > 1 ? " tie" : "") + ": " + names + " → " + fmt(pts) + " pts";
+        }).join(" · ");
+        return '<div class="sline"><b>' + label + '</b> · ' + day.count + (day.count === 1 ? ' rotation' : ' rotations') + '<br>' + line + '</div>';
+      }).join("") + '</div>';
+    var stats = tallyPickle();
+    var counts = {};
+    PLAYERS.forEach(function(p){ counts[p] = [0,0,0,0]; });
+    state.pickle.forEach(function(entry){
+      entry.order.forEach(function(p, k){ counts[p][k] += 1; });
+    });
+    stand.innerHTML = standingsHTML(stats, "Pickleball standings — all dates", function(p, s){
+      var c = counts[p];
+      return s.wins + (s.wins === 1 ? " rotation win" : " rotation wins") +
+        " · 1st " + c[0] + " · 2nd " + c[1] + " · 3rd " + c[2] + " · 4th " + c[3];
+    });
+  }
+
+  /* ---------- per-date painters (a date tab's recap inside its event) ---------- */
+  function paintDayGolf(date){
+    var hist = el("d-golf-history"), stand = el("d-golf-standings");
+    if (!hist) return;
+    var rows = entriesOn(state.golf, date);
+    if (!rows.length){
+      hist.innerHTML = '<p class="none-yet">No rounds on this day yet.</p>';
+      stand.innerHTML = "";
+      return;
+    }
+    hist.innerHTML = rows.map(function(x){
+      if (editing && editing.kind === "golf" && editing.index === x.index) return editFormHTML("golf", x.entry);
+      var groups = rankGroups(x.entry.pts, true);
+      return '<div class="hrow tappable" data-editrow="golf" data-idx="' + x.index + '"><span class="h-title">Round ' + (x.index + 1) + '</span>' +
+        '<span class="h-body">' + describeFinish(groups, x.entry.pts, " pts") + '</span>' +
+        '<button class="del" type="button" data-del-golf="' + x.index + '">Remove</button></div>';
+    }).join("");
+    var stats = tallySimple(rows.map(function(x){ return x.entry; }), "golf");
+    stand.innerHTML = standingsHTML(stats, "Standings — " + fmtDate(date), function(p, s){
+      return s.wins + (s.wins === 1 ? " round win" : " round wins") + " · " + fmt(s.raw) + " raw pts";
+    });
+  }
+
+  function paintDayCards(date){
+    var hist = el("d-cards-history"), stand = el("d-cards-standings");
+    if (!hist) return;
+    var rows = entriesOn(state.cards, date);
+    if (!rows.length){
+      hist.innerHTML = '<p class="none-yet">No games on this day yet.</p>';
+      stand.innerHTML = "";
+      return;
+    }
+    hist.innerHTML = rows.map(function(x){
+      if (editing && editing.kind === "cards" && editing.index === x.index) return editFormHTML("cards", x.entry);
+      var groups = rankGroups(x.entry.scores, false);
+      return '<div class="hrow tappable" data-editrow="cards" data-idx="' + x.index + '"><span class="h-title">Game ' + (x.index + 1) + '</span>' +
+        '<span class="h-body">' + describeFinish(groups, x.entry.scores, "") + '</span>' +
+        '<button class="del" type="button" data-del-cards="' + x.index + '">Remove</button></div>';
+    }).join("");
+    var stats = tallySimple(rows.map(function(x){ return x.entry; }), "cards");
+    stand.innerHTML = standingsHTML(stats, "Standings — " + fmtDate(date), function(p, s){
+      return s.wins + (s.wins === 1 ? " game win" : " game wins") + " · " + fmt(s.raw) + " total score";
+    });
+  }
+
+  function paintDayWordle(date){
+    var hist = el("d-wordle-history"), stand = el("d-wordle-standings");
+    if (!hist) return;
+    var rows = entriesOn(state.wordle, date);
+    if (!rows.length){
+      hist.innerHTML = '<p class="none-yet">No Wordle on this day yet.</p>';
+      stand.innerHTML = "";
+      return;
+    }
+    hist.innerHTML = rows.map(function(x){
+      if (editing && editing.kind === "wordle" && editing.index === x.index) return editFormHTML("wordle", x.entry);
+      var groups = rankGroups(x.entry.tries, false);
+      var body = describeFinish(groups, x.entry.tries, "", function(v){ return v === 7 ? "miss" : v + (v === 1 ? " try" : " tries"); });
+      return '<div class="hrow tappable" data-editrow="wordle" data-idx="' + x.index + '"><span class="h-title">Wordle</span>' +
+        '<span class="h-body">' + body + '</span>' +
+        '<button class="del" type="button" data-del-wordle="' + x.index + '">Remove</button></div>';
+    }).join("");
+    var stats = tallySimple(rows.map(function(x){ return x.entry; }), "wordle");
+    stand.innerHTML = standingsHTML(stats, "Standings — " + fmtDate(date), function(p, s){
+      return s.raw === 7 ? "Missed today" : s.raw + (s.raw === 1 ? " try" : " tries") + " today";
+    });
+  }
+
+  function paintDayPickle(date){
+    var hist = el("d-pickle-history"), settle = el("d-pickle-settle"), stand = el("d-pickle-standings");
+    if (!hist) return;
+    var rows = entriesOn(state.pickle, date);
+    if (!rows.length){
+      hist.innerHTML = '<p class="none-yet">No rotations on this day yet.</p>';
+      settle.innerHTML = "";
+      stand.innerHTML = "";
+      return;
+    }
+    hist.innerHTML = rows.map(function(x){
+      if (editing && editing.kind === "pickle" && editing.index === x.index) return editFormHTML("pickle", x.entry);
+      var body = x.entry.order.map(function(p, k){
+        return POS_LABEL[k] + ": " + avatar(p, "xs") + "<b>" + p + "</b>";
+      }).join(" · ");
+      return '<div class="hrow tappable" data-editrow="pickle" data-idx="' + x.index + '"><span class="h-title">Rotation ' + (x.index + 1) + '</span>' +
+        '<span class="h-body">' + body + '</span>' +
+        '<button class="del" type="button" data-del-pickle="' + x.index + '">Remove</button></div>';
+    }).join("");
+    var dayInfo = null;
+    pickleDays().forEach(function(d){ if (d.date === date) dayInfo = d; });
+    if (dayInfo){
+      settle.innerHTML = '<div class="settle-box"><div class="st">Day settlement — Olympic points</div><div class="sline">' +
+        dayInfo.groups.map(function(gr){
+          var pts = dayInfo.awards[gr.players[0]];
+          var names = gr.players.map(function(p){
+            return avatar(p, "xs") + "<b>" + p + "</b> (" + dayInfo.wins[p] + (dayInfo.wins[p] === 1 ? " win" : " wins") + ")";
+          }).join(", ");
+          return POS_LABEL[gr.start] + (gr.players.length > 1 ? " tie" : "") + ": " + names + " → " + fmt(pts) + " pts";
+        }).join(" · ") + '</div></div>';
+    } else {
+      settle.innerHTML = "";
+    }
+    var counts = {}, wins = {};
+    PLAYERS.forEach(function(p){ counts[p] = [0,0,0,0]; wins[p] = 0; });
+    rows.forEach(function(x){
+      x.entry.order.forEach(function(p, k){ counts[p][k] += 1; });
+      wins[x.entry.order[0]] += 1;
+    });
+    var dstats = {};
+    PLAYERS.forEach(function(p){
+      dstats[p] = { olympic: (dayInfo && dayInfo.awards[p] != null) ? dayInfo.awards[p] : 0, wins: wins[p], raw: 0 };
+    });
+    stand.innerHTML = standingsHTML(dstats, "Standings — " + fmtDate(date), function(p){
+      var c = counts[p];
+      return "1st " + c[0] + " · 2nd " + c[1] + " · 3rd " + c[2] + " · 4th " + c[3];
+    });
+  }
+
+  /* ---------- pickleball tap-to-rank widget (date tabs) ---------- */
+  var pickleOrder = [];
+  function renderPickleEntry(){
+    var chipsEl = el("pickle-chips"), orderEl = el("pickle-order"), btn = el("pickle-record");
+    if (!chipsEl || !orderEl || !btn) return;
+    chipsEl.innerHTML = PLAYERS.map(function(p){
+      var placed = pickleOrder.indexOf(p) >= 0;
+      return '<button type="button" class="chip' + (placed ? ' placed' : '') + '" data-chip="' + p + '"' +
+        (placed ? ' disabled' : '') + '>' + avatar(p, "sm") + p + '</button>';
+    }).join("");
+    orderEl.innerHTML = pickleOrder.map(function(p, i){
+      var undo = i === pickleOrder.length - 1
+        ? '<button type="button" class="del undo" id="pickle-undo">Undo</button>' : '';
+      return '<li><span class="pos">' + POS_LABEL[i] + '</span> ' + avatar(p, "sm") + p + undo + '</li>';
+    }).join("");
+    btn.disabled = pickleOrder.length !== 4;
+  }
+
+  /* ---------- sheet rendering ---------- */
+  var sheetEl = el("sheet");
+  function captureInputs(){
+    var saved = {};
+    var inputs = sheetEl.querySelectorAll("input[id]");
+    for (var i = 0; i < inputs.length; i++){
+      if (inputs[i].id.indexOf("ed-") === 0) continue; // edit forms prefill from their own entry
+      saved[inputs[i].id] = inputs[i].value;
+    }
+    return saved;
+  }
+  function restoreInputs(saved){
+    Object.keys(saved).forEach(function(id){
+      var n = el(id);
+      if (n) n.value = saved[id];
+    });
+  }
+  function renderSheet(){
+    // All four event sections render at once; each shows only its own
+    // active tab's content. Typed-but-unsaved values survive a re-render;
+    // the form just saved was already cleared by its handler, so it comes
+    // back empty as intended.
+    var saved = captureInputs();
+    sheetEl.innerHTML = EVENTS.map(function(kind){ return sectionHTML(kind); }).join("");
+    EVENTS.forEach(paintEvent);
+    restoreInputs(saved);
+  }
+
+  /* ---------- entry: a form posts to its own section's open date tab ---------- */
+  function noteCreated(kind, date){
+    if (date && createdByEvent[kind].indexOf(date) < 0) createdByEvent[kind].push(date);
+  }
+  sheetEl.addEventListener("submit", function(e){
+    e.preventDefault();
+    var id = e.target.id;
+    if (id === "golf-form"){
+      var gErr = el("golf-err");
+      var pts = readScores("golf", gErr);
+      if (!pts) return;
+      state.golf.push({ pts: pts, date: eventTab.golf });
+      noteCreated("golf", eventTab.golf);
+      clearInputs("golf");
+      renderAll(true);
+    } else if (id === "cards-form"){
+      var cErr = el("cards-err");
+      var scores = readScores("cards", cErr);
+      if (!scores) return;
+      state.cards.push({ scores: scores, date: eventTab.cards });
+      noteCreated("cards", eventTab.cards);
+      clearInputs("cards");
+      renderAll(true);
+    } else if (id === "wordle-form"){
+      var wErr = el("wordle-err");
+      var tries = readScores("wordle", wErr, 1, 7, "Wordle tries run 1–6, with 7 for a miss");
+      if (!tries) return;
+      var wDate = eventTab.wordle;
+      if (wDate < WORDLE_FIRST || wDate > WORDLE_LAST){
+        wErr.textContent = "Wordle is played Oct 31 – Nov 7 — this day is outside the run.";
+        return;
+      }
+      if (wordleEntryOn(wDate)){
+        wErr.textContent = "Wordle for " + fmtDate(wDate) + " is already in — remove that entry in this section to change it.";
+        return;
+      }
+      state.wordle.push({ tries: tries, date: wDate });
+      clearInputs("wordle");
+      renderAll(true);
+    }
+  });
+  sheetEl.addEventListener("click", function(e){
+    var evTabBtn = e.target.closest("[data-evtab]");
+    if (evTabBtn){
+      eventTab[evTabBtn.getAttribute("data-kind")] = evTabBtn.getAttribute("data-evtab");
+      renderAll(true);
+      return;
+    }
+    var edRow = e.target.closest("[data-editrow]");
+    if (edRow && !e.target.closest("button") && !e.target.closest("input")){
+      var ek = edRow.getAttribute("data-editrow"), ei = Number(edRow.getAttribute("data-idx"));
+      if (!(editing && editing.kind === ek && editing.index === ei)){
+        editing = { kind: ek, index: ei };
+        if (ek === "pickle") editOrder = state.pickle[ei] ? state.pickle[ei].order.slice() : [];
+        renderAll(true);
+      }
+      return;
+    }
+    var saveBtn = e.target.closest("[data-editsave]");
+    if (saveBtn){ saveEdit(saveBtn.getAttribute("data-editsave")); return; }
+    if (e.target.closest("[data-editcancel]")){ editing = null; renderAll(true); return; }
+    var edChip = e.target.closest("[data-editchip]");
+    if (edChip && !edChip.disabled){
+      if (editOrder.length < 4) editOrder.push(edChip.getAttribute("data-editchip"));
+      renderEditPickle();
+      return;
+    }
+    if (e.target.closest("#ed-pickle-undo")){ editOrder.pop(); renderEditPickle(); return; }
+    if (e.target.closest("#ed-pickle-save")){
+      if (editOrder.length === 4 && editing && editing.kind === "pickle" && state.pickle[editing.index]){
+        state.pickle[editing.index] = { order: editOrder.slice(), date: state.pickle[editing.index].date };
+        editing = null;
+        renderAll(true);
+      }
+      return;
+    }
+    var edDayBtn = e.target.closest("[data-editday]");
+    if (edDayBtn){
+      var panel = el("dayactions-" + edDayBtn.getAttribute("data-editday"));
+      if (panel) panel.hidden = !panel.hidden;
+      return;
+    }
+    var dcBtn = e.target.closest("[data-daycancel]");
+    if (dcBtn){
+      var dp = el("dayactions-" + dcBtn.getAttribute("data-daycancel"));
+      if (dp) dp.hidden = true;
+      return;
+    }
+    var rmBtn = e.target.closest("[data-removeday]");
+    if (rmBtn){ removeDay(rmBtn.getAttribute("data-removeday")); return; }
+    var addBtn = e.target.closest("[data-addday]");
+    if (addBtn){ openEvPop(addBtn.getAttribute("data-addday")); return; }
+    var confBtn = e.target.closest("[data-addconfirm]");
+    if (confBtn){ confirmEvDay(confBtn.getAttribute("data-addconfirm")); return; }
+    var cancBtn = e.target.closest("[data-addcancel]");
+    if (cancBtn){
+      var pop = el("pop-" + cancBtn.getAttribute("data-addcancel"));
+      if (pop) pop.hidden = true;
+      return;
+    }
+    var chip = e.target.closest("[data-chip]");
+    if (chip && !chip.disabled){
+      if (pickleOrder.length < 4) pickleOrder.push(chip.getAttribute("data-chip"));
+      renderPickleEntry();
+      return;
+    }
+    if (e.target.closest("#pickle-undo")){
+      pickleOrder.pop();
+      renderPickleEntry();
+      return;
+    }
+    if (e.target.closest("#pickle-record")){
+      if (pickleOrder.length !== 4) return;
+      state.pickle.push({ order: pickleOrder.slice(), date: eventTab.pickle });
+      noteCreated("pickle", eventTab.pickle);
+      pickleOrder = [];
+      renderAll(true);
+    }
+  });
+
+  /* ---------- delete individual entries ---------- */
+  document.addEventListener("click", function(e){
+    var g = e.target.closest("[data-del-golf]");
+    var p = e.target.closest("[data-del-pickle]");
+    var c = e.target.closest("[data-del-cards]");
+    var w = e.target.closest("[data-del-wordle]");
+    if (g){ state.golf.splice(Number(g.getAttribute("data-del-golf")), 1); editing = null; renderAll(true); }
+    if (p){ state.pickle.splice(Number(p.getAttribute("data-del-pickle")), 1); editing = null; renderAll(true); }
+    if (c){ state.cards.splice(Number(c.getAttribute("data-del-cards")), 1); editing = null; renderAll(true); }
+    if (w){ state.wordle.splice(Number(w.getAttribute("data-del-wordle")), 1); editing = null; renderAll(true); }
+  });
+
+  /* ---------- per-event "+ Add day": enter a date, its tab is created ---------- */
+  function defaultNewDate(kind){
+    var ds = datesFor(kind);
+    if (!ds.length) return WORDLE_FIRST;
+    var d = new Date(ds[ds.length - 1] + "T12:00:00");
+    d.setDate(d.getDate() + 1);
+    var m = String(d.getMonth() + 1).padStart(2, "0"), day = String(d.getDate()).padStart(2, "0");
+    return d.getFullYear() + "-" + m + "-" + day;
+  }
+  function openEvPop(kind){
+    EVENTS.forEach(function(k){
+      var p = el("pop-" + k);
+      if (p) p.hidden = k !== kind;
+    });
+    var input = el("pop-date-" + kind);
+    if (input) input.value = defaultNewDate(kind);
+  }
+  function confirmEvDay(kind){
+    var input = el("pop-date-" + kind);
+    var d = input ? input.value : "";
+    if (!d) return;
+    if (createdByEvent[kind].indexOf(d) < 0) createdByEvent[kind].push(d);
+    eventTab[kind] = d; // the new date's tab opens, ready for its scores
+    renderAll(true);
+  }
+
+  /* ---------- View tabs + Details (CPU scorekeeping program) ----------
+     CPU, not GPU: no animation loops, no gradients, no blur/shadow stacks,
+     no timers or observers. All math is plain integer arithmetic run
+     ONCE per change (enter / edit / remove). The front page is the
+     original layout: the Scoreboard plus all four event sections with
+     their entry forms. The Details breakdown DOM is built only while
+     Details is open, so the phone isn't rendering it up front. */
+  var currentView = "scoreboard";
+  /* Points a single golf / cards / wordle entry awards each player. */
+  function entryAward(kind, entry){
+    var map = kind === "golf" ? entry.pts : kind === "cards" ? entry.scores : entry.tries;
+    var awards = {};
+    rankGroups(map, kind === "golf").forEach(function(g){
+      var pts = groupPoints(g.start, g.players.length);
+      g.players.forEach(function(p){ awards[p] = pts; });
+    });
+    return awards;
+  }
+
+  /* One event's detail card: every entry with the points it paid out,
+     then the event summary — what each player has banked in this event. */
+  function eventDetailHTML(kind){
+    var titles = { golf:"Golf", pickle:"Pickleball", cards:"Cards — Golf", wordle:"Wordle" };
+    var rawHeads = { golf:"Raw pts", pickle:"Rotations", cards:"Total score", wordle:"Avg tries" };
+    var stats = eventStats(kind);
+    var or = orderAndRanks(stats);
+    var body = "";
+    if (kind === "pickle"){
+      var days = pickleDays();
+      if (!days.length){
+        body = '<p class="lead">No rotations recorded yet. Post them in the Pickleball section on the front page and each day\'s detail lands here.</p>';
+      } else {
+        body = '<p class="lead">Rotations settle by the day — each cell is that day\'s rotation wins, then the Olympic points they earned after the arrow.</p>' +
+          '<div style="overflow-x:auto"><table class="detail-table"><thead><tr><th>Day</th>' +
+          PLAYERS.map(function(p){ return '<th class="num">' + p + '</th>'; }).join("") + '</tr></thead><tbody>' +
+          days.map(function(day){
+            return '<tr><td>' + (day.date ? fmtDate(day.date) : "Undated") + '<br>' + day.count + (day.count === 1 ? " rotation" : " rotations") + '</td>' +
+              PLAYERS.map(function(p){
+                return day.awards[p] != null
+                  ? '<td class="num">' + day.wins[p] + ' → <b>' + fmt(day.awards[p]) + '</b></td>'
+                  : '<td class="num">—</td>';
+              }).join("") + '</tr>';
+          }).join("") + '</tbody></table></div>';
+      }
+    } else {
+      var list = state[kind];
+      var unit = kind === "golf" ? "Round" : kind === "cards" ? "Game" : "Day";
+      if (!list.length){
+        body = '<p class="lead">Nothing recorded yet. Post scores in the ' + titles[kind] + ' section on the front page and the detail lands here, entry by entry.</p>';
+      } else {
+        body = '<p class="lead">Every entry, with the Olympic points it paid out — raw score first, points after the arrow.</p>' +
+          '<div style="overflow-x:auto"><table class="detail-table"><thead><tr><th>' + unit + '</th>' +
+          PLAYERS.map(function(p){ return '<th class="num">' + p + '</th>'; }).join("") + '</tr></thead><tbody>' +
+          list.map(function(entry, i){
+            var map = kind === "golf" ? entry.pts : kind === "cards" ? entry.scores : entry.tries;
+            var awards = entryAward(kind, entry);
+            return '<tr><td>' + unit + ' ' + (i + 1) + (entry.date ? '<br>' + fmtDate(entry.date) : '') + '</td>' +
+              PLAYERS.map(function(p){
+                var raw = kind === "wordle" ? (map[p] === 7 ? "miss" : String(map[p])) : fmt(map[p]);
+                return '<td class="num">' + raw + ' → <b>' + fmt(awards[p]) + '</b></td>';
+              }).join("") + '</tr>';
+          }).join("") + '</tbody></table></div>';
+      }
+    }
+    var summary = '<p class="lead" style="margin-top:12px"><b>' + titles[kind] + ' summary</b> — ranked by the points banked in this event. The Event pts column is what rolls into the totals below.</p>' +
+      '<div style="overflow-x:auto"><table class="detail-table"><thead><tr><th>Place</th><th>Player</th><th class="num">' + rawHeads[kind] + '</th><th class="num">Wins</th><th class="num">Event pts</th></tr></thead><tbody>' +
+      or.order.map(function(p){
+        var rawVal = kind === "wordle"
+          ? (state.wordle.length ? fmt(Math.round((stats[p].raw / state.wordle.length) * 10) / 10) : "—")
+          : fmt(stats[p].raw);
+        return '<tr><td>' + (or.ranks[p] + 1) + '</td><td><b>' + p + '</b></td><td class="num">' + rawVal + '</td><td class="num">' + stats[p].wins + '</td><td class="num"><b>' + fmt(stats[p].olympic) + '</b></td></tr>';
+      }).join("") + '</tbody></table></div>';
+    return '<div class="card detail-card"><h3>' + titles[kind] + ' — detail score</h3>' + body + summary + '</div>';
+  }
+
+  function renderDetails(){
+    var root = el("details-root");
+    if (!root) return;
+    var rows = computeStandings();
+    var totalEntries = state.golf.length + state.pickle.length + state.cards.length + state.wordle.length;
+    var details = EVENTS.map(function(kind){ return eventDetailHTML(kind); }).join("");
+    var rollup = '<div class="card detail-card"><h3>The roll-up — totals &amp; awards</h3>' +
+      '<p class="lead">' + (totalEntries ? totalEntries + (totalEntries===1?' entry':' entries') + ' recorded so far. Each event summary above adds into this table — the same race as the front scoreboard, with the $200 pot on the line.' : 'No entries yet. Post scores in the event sections on the front page and each event\'s summary rolls up into this table — total points decide the places, and the places decide the $200 pot.') + '</p>' +
+      '<div style="overflow-x:auto"><table class="detail-table"><thead><tr><th>Place</th><th>Player</th><th class="num">Golf</th><th class="num">Pickleball</th><th class="num">Cards</th><th class="num">Wordle</th><th class="num">Total</th><th class="num">Wins</th><th class="num">Payout</th></tr></thead><tbody>' +
+      rows.map(function(r){
+        var tied = rows.filter(function(x){ return x.rank === r.rank; }).length > 1;
+        return '<tr><td>' + POS_LABEL[r.rank] + (tied ? " (tie)" : "") + '</td><td><b>' + r.name + '</b></td><td class="num">' + fmt(r.golfO) + '</td><td class="num">' + fmt(r.pickleO) + '</td><td class="num">' + fmt(r.cardsO) + '</td><td class="num">' + fmt(r.wordleO) + '</td><td class="num"><b>' + fmt(r.olympic) + '</b></td><td class="num">' + r.wins + '</td><td class="num">' + (r.pay>0?fmtMoney(r.pay):'—') + '</td></tr>';
+      }).join("") + '</tbody></table></div>' +
+      '<p class="lead" style="margin-top:10px">Entries by event — Golf: ' + state.golf.length + ' · Pickleball rotations: ' + state.pickle.length + ' · Card games: ' + state.cards.length + ' · Wordle days: ' + state.wordle.length + ' of 8 (Oct 31–Nov 7).</p></div>';
+
+    var how = '<div class="card detail-card"><h3>How the program scores it</h3>' +
+      '<ul class="rules-list">' +
+      '<li><b>Olympic points, every event:</b> 1st = 4 · 2nd = 3 · 3rd = 2 · 4th = 1. Nobody banks zero for playing — the no-zero rule.</li>' +
+      '<li><b>Ties split:</b> tied players share the points for the places they cover (e.g. two tied for 1st get (4+3) ÷ 2 = 3.5 each). Payouts split the same way.</li>' +
+      '<li><b>Payouts — $200 pot:</b> 1st $100 · 2nd $60 · 3rd $40 · 4th deals the cards. Shown on the front scoreboard.</li>' +
+      '<li><b>Golf (points game):</b> most points in the round wins the round. <b>Cards — Golf:</b> lowest score wins.</li>' +
+      '<li><b>Pickleball:</b> enter each rotation\'s finishing order. A day\'s rotations settle together — most rotation wins that day takes 4, then 3 · 2 · 1.</li>' +
+      '<li><b>Wordle:</b> one per day, Oct 31–Nov 7. Fewest tries wins the day; 7 = missed, ranks last but still earns 1 point.</li>' +
+      '<li><b>Overall ranking:</b> total Olympic points first, event wins break ties. Full ties share a place and split the payout.</li>' +
+      '</ul></div>';
+
+    var howBuilt = '<div class="card detail-card"><h3>Built to run light</h3>' +
+      '<p class="lead">This page does its work on the CPU, once, when a score changes — no GPU effects, no background animation, no live re-rendering. Flat colours instead of gradients, no blur or heavy shadows, and this Details breakdown is only built while this tab is open. Close Details and you\'re back to the front page. That\'s deliberate: a scorekeeper should be remembered for the numbers, not forgotten when a fancy effect stalls — CPU doesn\'t forget.</p></div>';
+
+    root.innerHTML = details + rollup + how + howBuilt;
+  }
+  function setView(v, keepScroll){
+    currentView = v;
+    var isDetails = v === "details";
+    var sb = el("view-scoreboard"), dt = el("view-details");
+    if (sb) sb.hidden = isDetails;
+    if (dt) dt.hidden = !isDetails;
+    var b1 = el("tab-btn-scoreboard"), b2 = el("tab-btn-details");
+    if (b1){ b1.classList.toggle("active", !isDetails); b1.setAttribute("aria-selected", String(!isDetails)); }
+    if (b2){ b2.classList.toggle("active", isDetails); b2.setAttribute("aria-selected", String(isDetails)); }
+    var note = el("view-note");
+    if (note) note.innerHTML = isDetails
+      ? 'Details — the breakdown behind every total on the front page. Tap <b>Scoreboard</b> to go back to the scoreboard and entry forms.'
+      : 'Front page — the scoreboard plus every event section and entry form. Tap <b>Details</b> for the scoring breakdown behind the totals.';
+    renderAll(keepScroll);
+    if (!keepScroll) window.scrollTo(0, 0);
+  }
+  document.addEventListener("click", function(e){
+    var t = e.target.closest("[data-viewtab]");
+    if (t) setView(t.getAttribute("data-viewtab"), false);
+  });
+
+  /* ---------- render ---------- */
+  function renderAll(keepScroll){
+    var y = window.scrollY || 0;
+    renderStandings();
+    if (currentView === "details"){
+      renderDetails();
+    } else {
+      renderSheet();
+    }
+    if (keepScroll) window.scrollTo(0, y);
+  }
+
+  renderAll(false);
+})();
+</script>
+</body>
+</html>
