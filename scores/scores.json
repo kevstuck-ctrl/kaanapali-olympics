@@ -1,0 +1,43 @@
+{
+  "cards": [
+    {
+      "date": "2026-10-31",
+      "game": 1,
+      "points": {
+        "Jon": 4,
+        "Kevin": 3,
+        "Amy": 2,
+        "Jane": 1
+      }
+    },
+    {
+      "date": "2026-10-31",
+      "game": 2,
+      "points": {
+        "Jane": 4,
+        "Jon": 3,
+        "Kevin": 2,
+        "Amy": 1
+      }
+    }
+  ],
+  "golf": [],
+  "pickleball": [],
+  "players": [
+    "Kevin",
+    "Amy",
+    "Jon",
+    "Jane"
+  ],
+  "wordle": [
+    {
+      "date": "2026-10-31",
+      "results": {
+        "Jon": 5,
+        "Amy": 5,
+        "Kevin": 5,
+        "Jane": 7
+      }
+    }
+  ]
+}
