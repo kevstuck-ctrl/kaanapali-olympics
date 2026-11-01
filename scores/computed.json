@@ -1,0 +1,63 @@
+{
+  "players": [
+    "Kevin",
+    "Amy",
+    "Jon",
+    "Jane"
+  ],
+  "events": {
+    "golf": {
+      "per_date": {},
+      "totals": {}
+    },
+    "pickleball": {
+      "per_date": {},
+      "totals": {},
+      "detail": {}
+    },
+    "cards": {
+      "per_date": {
+        "2026-10-31": {
+          "Jon": 7,
+          "Kevin": 5,
+          "Amy": 3,
+          "Jane": 5
+        }
+      },
+      "totals": {
+        "Jon": 7.0,
+        "Kevin": 5.0,
+        "Amy": 3.0,
+        "Jane": 5.0
+      }
+    },
+    "wordle": {
+      "per_date": {
+        "2026-10-31": {
+          "Kevin": 3.0,
+          "Amy": 3.0,
+          "Jon": 3.0,
+          "Jane": 1.0
+        }
+      },
+      "totals": {
+        "Kevin": 3.0,
+        "Amy": 3.0,
+        "Jon": 3.0,
+        "Jane": 1.0
+      }
+    }
+  },
+  "overall": {
+    "Kevin": 8.0,
+    "Amy": 6.0,
+    "Jon": 10.0,
+    "Jane": 6.0
+  },
+  "medal_order": [
+    "Jon",
+    "Kevin",
+    "Amy",
+    "Jane"
+  ]
+}
