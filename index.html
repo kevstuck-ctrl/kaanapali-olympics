@@ -269,6 +269,20 @@
   }
   .btn:disabled{opacity:.45;cursor:default}
   .form-err{color:var(--danger);font-size:14px;font-weight:600;margin:10px 0 0;min-height:1.2em}
+  .flash-ok{
+    border:1.5px solid var(--teal);border-radius:10px;padding:11px 13px;margin:0 0 12px;
+    font-size:14.5px;font-weight:700;color:var(--ink);background:var(--surface-2);
+  }
+  .flash-ok b{color:var(--teal)}
+  .game-head{
+    font-family:"Bricolage Grotesque",sans-serif;font-weight:800;font-size:19px;margin:0 0 8px;
+  }
+  .pop-hint{flex-basis:100%;font-size:13px;color:var(--ink-soft);margin:0}
+  .add-another{
+    appearance:none;cursor:pointer;font-family:inherit;font-weight:800;font-size:15px;
+    width:100%;margin-top:12px;padding:12px;border-radius:10px;
+    border:1.5px dashed var(--teal);background:var(--surface);color:var(--teal);
+  }
 
   /* Pickleball tap-to-rank */
   .tap-hint{font-size:14px;color:var(--ink-soft);margin:0 0 10px}
@@ -857,7 +871,7 @@
   var EVENT_META = {
     golf:   { mark:"golf",   title:"Golf — points games",       rule:"Enter the points each player earned in the round. Most points wins the round." },
     pickle: { mark:"pickle", title:"Pickleball — round robin",  rule:"Enter each rotation as you play it. Olympic points settle at the end of each day: the day's wins leader takes 4, then 3 · 2 · 1 down the wins table — ties in wins split the points." },
-    cards:  { mark:"cards",  title:"Cards — Golf",              rule:"Enter each player's score for the game. Lowest score wins — just like the name says." },
+    cards:  { mark:"cards",  title:"Cards — Golf",              rule:"Enter each player's score for the game. Lowest score wins — just like the name says. Play as many games a day as you like: every game on the same date counts on its own." },
     wordle: { mark:"wordle", title:"Wordle — daily",            rule:"One Wordle a day. Enter how many tries each player took — fewest tries wins the day. Missed it entirely? Enter 7 and it ranks last, but still earns a point." }
   };
   function secHead(kind){
@@ -890,10 +904,14 @@
   function sectionHTML(kind){
     var pop = kind === "wordle" ? "" :
       '<div class="add-day-pop" id="pop-' + kind + '" hidden>' +
-      '<label for="pop-date-' + kind + '">New date</label>' +
+      '<label for="pop-date-' + kind + '">Date</label>' +
       '<input type="date" id="pop-date-' + kind + '" />' +
-      '<button type="button" class="pop-btn" data-addconfirm="' + kind + '">Add day</button>' +
-      '<button type="button" class="pop-btn ghost" data-addcancel="' + kind + '">Cancel</button></div>';
+      '<button type="button" class="pop-btn" data-addconfirm="' + kind + '">Open day</button>' +
+      '<button type="button" class="pop-btn ghost" data-addcancel="' + kind + '">Cancel</button>' +
+      (kind === "cards"
+        ? '<p class="pop-hint">Already have a game on that date? Pick the <b>same date again</b> — it reopens that day so you can add another game there. No fake future date needed.</p>'
+        : '<p class="pop-hint">Picking a date you already have just reopens that day.</p>') +
+      '</div>';
     return '<section aria-label="' + EVENT_META[kind].title + '">' + secHead(kind) +
       '<div class="card"><div class="ev-leaders" id="leaders-' + kind + '"></div>' +
       '<div class="ev-tabs" id="tabs-' + kind + '" role="tablist"></div>' + pop +
@@ -908,7 +926,8 @@
     if (kind === "pickle")
       return line + '<div id="pickle-standings"></div><div class="history" id="pickle-history" style="margin-top:0"></div><div id="pickle-settle"></div>';
     if (kind === "cards")
-      return line + '<div id="cards-standings"></div><div class="history" id="cards-history" style="margin-top:0"></div>';
+      return '<p class="sheet-date-line">Event standings — every date rolled up, ranked by Olympic points. Tap a date tab above to add games on that date — <b>you can record as many games on one date as you play</b> (Game 1, Game 2, Game 3… on Oct 31 all count). Tap an entry below to edit it.</p>' +
+        '<div id="cards-standings"></div><div class="history" id="cards-history" style="margin-top:0"></div>';
     return line + '<div id="wordle-standings"></div><div class="history" id="wordle-history" style="margin-top:0"></div>';
   }
   function dateContentHTML(kind, date){
@@ -930,11 +949,23 @@
         '<div class="history" id="d-pickle-history"></div><div id="d-pickle-settle"></div><div id="d-pickle-standings"></div>';
     }
     if (kind === "cards"){
-      return '<p class="sheet-date-line">Scoring for <b>' + label + '</b> — games posted here stay on this date. Tap an entry below to edit it.</p>' +
+      // Cards is multi-game-per-day by design: the form on a date tab is
+      // ALWAYS open, no matter how many games that date already has, and
+      // each submit adds one more game to the same date. There is no
+      // one-per-day check anywhere for cards (that rule is Wordle-only).
+      var played = entriesOn(state.cards, date).length;
+      var nextNo = played + 1;
+      var countLine = played === 0
+        ? 'No games on this date yet — this will be <b>Game 1</b> on ' + label + '.'
+        : '<b>' + played + (played === 1 ? ' game' : ' games') + ' already on ' + label + '</b> — this form adds <b>Game ' + nextNo + '</b> on the same date. Keep adding games here all day; no new date needed.';
+      return flashHTML(kind, date) +
+        '<p class="game-head">Add Game ' + nextNo + ' — ' + label + '</p>' +
+        '<p class="sheet-date-line">' + countLine + ' Tap a game below to edit it.</p>' +
         '<form id="cards-form" novalidate><div class="score-grid" id="cards-inputs"></div>' +
         '<p class="form-err" id="cards-err"></p>' +
-        '<button class="btn" type="submit">Record card game</button></form>' +
-        '<div class="history" id="d-cards-history"></div><div id="d-cards-standings"></div>';
+        '<button class="btn" type="submit">Record Game ' + nextNo + ' on ' + label + '</button></form>' +
+        '<div class="history" id="d-cards-history"></div><div id="d-cards-standings"></div>' +
+        (played > 0 ? '<button type="button" class="add-another" data-addanother="cards">+ Add another game on ' + label + '</button>' : '');
     }
     // Wordle: one entry per day — once posted, the tab shows the recap and
     // the entry can be removed to change it.
@@ -985,6 +1016,14 @@
     }
     if (editing && editing.kind === "pickle") renderEditPickle();
     paintDayBar(kind);
+  }
+
+  /* One-shot confirmation banner, e.g. after recording another card game
+     on a date that already has games. { kind, date, html } or null. */
+  var flash = null;
+  function flashHTML(kind, date){
+    if (!flash || flash.kind !== kind || flash.date !== date) return "";
+    return '<div class="flash-ok" role="status">' + flash.html + '</div>';
   }
 
   /* ---------- tap-an-entry-to-edit ---------- */
@@ -1228,15 +1267,18 @@
       stand.innerHTML = "";
       return;
     }
-    hist.innerHTML = rows.map(function(x){
+    hist.innerHTML = rows.map(function(x, pos){
       if (editing && editing.kind === "cards" && editing.index === x.index) return editFormHTML("cards", x.entry);
       var groups = rankGroups(x.entry.scores, false);
-      return '<div class="hrow tappable" data-editrow="cards" data-idx="' + x.index + '"><span class="h-title">Game ' + (x.index + 1) + '</span>' +
+      // Number games within THIS day (Game 1, 2, 3… on Oct 31), not by
+      // their position in the all-dates list — same-day multiples read
+      // as a sequence on the day they were played.
+      return '<div class="hrow tappable" data-editrow="cards" data-idx="' + x.index + '"><span class="h-title">Game ' + (pos + 1) + '</span>' +
         '<span class="h-body">' + describeFinish(groups, x.entry.scores, "") + '</span>' +
         '<button class="del" type="button" data-del-cards="' + x.index + '">Remove</button></div>';
     }).join("");
     var stats = tallySimple(rows.map(function(x){ return x.entry; }), "cards");
-    stand.innerHTML = standingsHTML(stats, "Standings — " + fmtDate(date), function(p, s){
+    stand.innerHTML = standingsHTML(stats, "Standings — " + fmtDate(date) + " · " + rows.length + (rows.length === 1 ? " game" : " games"), function(p, s){
       return s.wins + (s.wins === 1 ? " game win" : " game wins") + " · " + fmt(s.raw) + " total score";
     });
   }
@@ -1378,8 +1420,16 @@
       var cErr = el("cards-err");
       var scores = readScores("cards", cErr);
       if (!scores) return;
-      state.cards.push({ scores: scores, date: eventTab.cards });
-      noteCreated("cards", eventTab.cards);
+      // No duplicate-date guard here on purpose: unlimited card games
+      // per date. Every submit appends a new game to the open date and
+      // the view STAYS on that date, form empty and ready for the next
+      // game — posting Game 2 on Oct 31 works exactly like Game 1.
+      var cDate = eventTab.cards;
+      var gameNo = entriesOn(state.cards, cDate).length + 1;
+      state.cards.push({ scores: scores, date: cDate });
+      noteCreated("cards", cDate);
+      eventTab.cards = cDate;
+      flash = { kind: "cards", date: cDate, html: "<b>Game " + gameNo + " recorded on " + fmtDate(cDate) + ".</b> Add the next game in the form below — same day, no new date needed." };
       clearInputs("cards");
       renderAll(true);
     } else if (id === "wordle-form"){
@@ -1403,8 +1453,22 @@
   sheetEl.addEventListener("click", function(e){
     var evTabBtn = e.target.closest("[data-evtab]");
     if (evTabBtn){
+      flash = null;
       eventTab[evTabBtn.getAttribute("data-kind")] = evTabBtn.getAttribute("data-evtab");
       renderAll(true);
+      return;
+    }
+    var anotherBtn = e.target.closest("[data-addanother]");
+    if (anotherBtn){
+      // "+ Add another game on this day": the form for the open date is
+      // at the top of this section — bring it into view and put the
+      // cursor in the first score box so the next game can be typed.
+      var form = el(anotherBtn.getAttribute("data-addanother") + "-form");
+      if (form){
+        form.scrollIntoView({ block: "start", behavior: "smooth" });
+        var first = form.querySelector("input");
+        if (first) first.focus({ preventScroll: true });
+      }
       return;
     }
     var edRow = e.target.closest("[data-editrow]");
@@ -1485,10 +1549,10 @@
     var p = e.target.closest("[data-del-pickle]");
     var c = e.target.closest("[data-del-cards]");
     var w = e.target.closest("[data-del-wordle]");
-    if (g){ state.golf.splice(Number(g.getAttribute("data-del-golf")), 1); editing = null; renderAll(true); }
-    if (p){ state.pickle.splice(Number(p.getAttribute("data-del-pickle")), 1); editing = null; renderAll(true); }
-    if (c){ state.cards.splice(Number(c.getAttribute("data-del-cards")), 1); editing = null; renderAll(true); }
-    if (w){ state.wordle.splice(Number(w.getAttribute("data-del-wordle")), 1); editing = null; renderAll(true); }
+    if (g){ state.golf.splice(Number(g.getAttribute("data-del-golf")), 1); editing = null; flash = null; renderAll(true); }
+    if (p){ state.pickle.splice(Number(p.getAttribute("data-del-pickle")), 1); editing = null; flash = null; renderAll(true); }
+    if (c){ state.cards.splice(Number(c.getAttribute("data-del-cards")), 1); editing = null; flash = null; renderAll(true); }
+    if (w){ state.wordle.splice(Number(w.getAttribute("data-del-wordle")), 1); editing = null; flash = null; renderAll(true); }
   });
 
   /* ---------- per-event "+ Add day": enter a date, its tab is created ---------- */
@@ -1512,8 +1576,19 @@
     var input = el("pop-date-" + kind);
     var d = input ? input.value : "";
     if (!d) return;
+    // Picking a date that already exists is NOT an error and never
+    // blocked: it simply reopens that day. For cards that is exactly
+    // how another game gets added to a day like Oct 31 — same date,
+    // next game — instead of inventing a fake future date.
+    var already = datesFor(kind).indexOf(d) >= 0;
     if (createdByEvent[kind].indexOf(d) < 0) createdByEvent[kind].push(d);
-    eventTab[kind] = d; // the new date's tab opens, ready for its scores
+    eventTab[kind] = d; // the date's tab opens, ready for its scores
+    if (already && kind === "cards"){
+      var n = entriesOn(state.cards, d).length;
+      flash = { kind: "cards", date: d, html: "<b>" + fmtDate(d) + " is already open</b> — " + (n ? n + (n === 1 ? " game" : " games") + " on this date so far. " : "") + "Add the next game in the form below; no fake date needed." };
+    } else {
+      flash = null;
+    }
     renderAll(true);
   }
 
@@ -1612,7 +1687,7 @@
       '<li><b>Olympic points, every event:</b> 1st = 4 · 2nd = 3 · 3rd = 2 · 4th = 1. Nobody banks zero for playing — the no-zero rule.</li>' +
       '<li><b>Ties split:</b> tied players share the points for the places they cover (e.g. two tied for 1st get (4+3) ÷ 2 = 3.5 each). Payouts split the same way.</li>' +
       '<li><b>Payouts — $200 pot:</b> 1st $100 · 2nd $60 · 3rd $40 · 4th deals the cards. Shown on the front scoreboard.</li>' +
-      '<li><b>Golf (points game):</b> most points in the round wins the round. <b>Cards — Golf:</b> lowest score wins.</li>' +
+      '<li><b>Golf (points game):</b> most points in the round wins the round. <b>Cards — Golf:</b> lowest score wins, and cards can be recorded as many times a day as you play — every game on the same date counts on its own (Game 1, Game 2, … on Oct 31).</li>' +
       '<li><b>Pickleball:</b> enter each rotation\'s finishing order. A day\'s rotations settle together — most rotation wins that day takes 4, then 3 · 2 · 1.</li>' +
       '<li><b>Wordle:</b> one per day, Oct 31–Nov 7. Fewest tries wins the day; 7 = missed, ranks last but still earns 1 point.</li>' +
       '<li><b>Overall ranking:</b> total Olympic points first, event wins break ties. Full ties share a place and split the payout.</li>' +
