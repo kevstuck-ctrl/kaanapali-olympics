@@ -563,6 +563,149 @@
   var eventTab = { golf: "total", pickle: "total", cards: "total", wordle: "total" };
   var EVENTS = ["golf", "pickle", "cards", "wordle"];
 
+  /* ---------- Scorebook persistence ----------
+     The scorebook used to live only in this page's memory: close the
+     app, reload it, or open another copy and every point vanished.
+     Now every change is written to this phone's storage the moment it
+     happens and read back on open, so scores survive closing and
+     reopening — entirely behind the scenes, with nothing for the
+     players to manage. */
+  var STORE_KEY = "kaanapali-olympics-scorebook-v1";
+  var storageOK = true;
+  var lastSavedAt = null;
+
+  /* ---------- Official ledger — Day 1, Sat Oct 31, 2026 ----------
+     These results were reported to the Commissioner and are baked into
+     the app itself, so the scorebook opens with Day 1 complete on ANY
+     copy of the app — even one whose phone storage was cleared (which
+     is how the first entries vanished). applyLedgerSeed() adds any
+     missing ledger entry once; the ledgerSeeded flag is then saved
+     with the book, so if a ledger entry is deliberately removed or
+     edited in the app, the change sticks and the seed stays out of
+     the way. Cards were reported as finishing orders, so each game's
+     scores below are the finishing places (1 = 1st … 4 = 4th) — in
+     Cards the lowest score wins, so the places score exactly as
+     played: Game 1 Jon 1st, Kevin 2nd, Amy 3rd, Jane 4th; Game 2
+     Jane 1st, Jon 2nd, Kevin 3rd, Amy 4th. */
+  var LEDGER_DATE = "2026-10-31";
+  var LEDGER_WORDLE = { tries: { Jon: 5, Jane: 7, Kevin: 5, Amy: 5 }, date: LEDGER_DATE };
+  var LEDGER_CARDS = [
+    { scores: { Jon: 1, Jane: 4, Kevin: 2, Amy: 3 }, date: LEDGER_DATE },
+    { scores: { Jon: 2, Jane: 1, Kevin: 3, Amy: 4 }, date: LEDGER_DATE }
+  ];
+  var ledgerSeeded = false;
+  function sameNumMap(a, b){
+    if (!a || !b) return false;
+    for (var i = 0; i < PLAYERS.length; i++){
+      if (a[PLAYERS[i]] !== b[PLAYERS[i]]) return false;
+    }
+    return true;
+  }
+  function applyLedgerSeed(){
+    if (ledgerSeeded) return;
+    var hasWordle = state.wordle.some(function(e){
+      return e.date === LEDGER_DATE && sameNumMap(e.tries, LEDGER_WORDLE.tries);
+    });
+    if (!hasWordle) state.wordle.push({ tries: { Jon: 5, Jane: 7, Kevin: 5, Amy: 5 }, date: LEDGER_DATE });
+    LEDGER_CARDS.forEach(function(game){
+      var has = state.cards.some(function(e){
+        return e.date === LEDGER_DATE && sameNumMap(e.scores, game.scores);
+      });
+      if (!has) state.cards.push({ scores: { Jon: game.scores.Jon, Jane: game.scores.Jane, Kevin: game.scores.Kevin, Amy: game.scores.Amy }, date: LEDGER_DATE });
+    });
+    if (createdByEvent.cards.indexOf(LEDGER_DATE) < 0) createdByEvent.cards.push(LEDGER_DATE);
+    ledgerSeeded = true;
+  }
+  function cleanDateStr(d){
+    return (typeof d === "string" && /^\d{4}-\d{2}-\d{2}$/.test(d)) ? d : "";
+  }
+  function cleanNumMap(obj){
+    if (!obj || typeof obj !== "object") return null;
+    var out = {};
+    for (var i = 0; i < PLAYERS.length; i++){
+      var v = Number(obj[PLAYERS[i]]);
+      if (!isFinite(v)) return null;
+      out[PLAYERS[i]] = v;
+    }
+    return out;
+  }
+  function cleanEntry(kind, e){
+    if (!e || typeof e !== "object") return null;
+    var date = cleanDateStr(e.date);
+    if (kind === "golf"){
+      var pts = cleanNumMap(e.pts);
+      return pts ? { pts: pts, date: date } : null;
+    }
+    if (kind === "cards"){
+      var scores = cleanNumMap(e.scores);
+      return scores ? { scores: scores, date: date } : null;
+    }
+    if (kind === "wordle"){
+      var tries = cleanNumMap(e.tries);
+      if (!tries) return null;
+      for (var i = 0; i < PLAYERS.length; i++){
+        var t = tries[PLAYERS[i]];
+        if (t < 1 || t > 7 || Math.floor(t) !== t) return null;
+      }
+      return { tries: tries, date: date };
+    }
+    // pickle: order must be all four players, each exactly once
+    if (!Array.isArray(e.order) || e.order.length !== 4) return null;
+    var seen = {};
+    for (var j = 0; j < 4; j++){
+      if (PLAYERS.indexOf(e.order[j]) < 0 || seen[e.order[j]]) return null;
+      seen[e.order[j]] = true;
+    }
+    return { order: e.order.slice(), date: date };
+  }
+  function cleanState(raw){
+    var out = { golf: [], pickle: [], cards: [], wordle: [] };
+    if (!raw || typeof raw !== "object") return out;
+    EVENTS.forEach(function(kind){
+      if (!Array.isArray(raw[kind])) return;
+      raw[kind].forEach(function(e){
+        var c = cleanEntry(kind, e);
+        if (c) out[kind].push(c);
+      });
+    });
+    return out;
+  }
+  function mergeCreated(created){
+    if (!created || typeof created !== "object") return;
+    ["golf", "pickle", "cards"].forEach(function(k){
+      if (!Array.isArray(created[k])) return;
+      created[k].forEach(function(d){
+        d = cleanDateStr(d);
+        if (d && createdByEvent[k].indexOf(d) < 0) createdByEvent[k].push(d);
+      });
+    });
+  }
+  function loadScores(){
+    var raw = null;
+    try { raw = window.localStorage.getItem(STORE_KEY); }
+    catch (err) { storageOK = false; return; }
+    if (!raw) return;
+    var data = null;
+    try { data = JSON.parse(raw); } catch (err) { return; }
+    if (!data || typeof data !== "object") return;
+    state = cleanState(data.state);
+    mergeCreated(data.created);
+    if (typeof data.savedAt === "string") lastSavedAt = data.savedAt;
+    if (data.ledgerSeeded === true) ledgerSeeded = true;
+  }
+  function persist(){
+    lastSavedAt = new Date().toISOString();
+    if (!storageOK) return;
+    try {
+      window.localStorage.setItem(STORE_KEY, JSON.stringify({
+        v: 1, savedAt: lastSavedAt, state: state, ledgerSeeded: ledgerSeeded,
+        created: { golf: createdByEvent.golf, pickle: createdByEvent.pickle, cards: createdByEvent.cards }
+      }));
+    } catch (err) { storageOK = false; }
+  }
+  loadScores();
+  applyLedgerSeed();
+
   /* ---------- dates ---------- */
   function todayISO(){
     var d = new Date();
@@ -1722,6 +1865,7 @@
   /* ---------- render ---------- */
   function renderAll(keepScroll){
     var y = window.scrollY || 0;
+    persist();
     renderStandings();
     if (currentView === "details"){
       renderDetails();
@@ -1730,6 +1874,11 @@
     }
     if (keepScroll) window.scrollTo(0, y);
   }
+
+  window.addEventListener("pagehide", persist);
+  document.addEventListener("visibilitychange", function(){
+    if (document.visibilityState === "hidden") persist();
+  });
 
   renderAll(false);
 })();
