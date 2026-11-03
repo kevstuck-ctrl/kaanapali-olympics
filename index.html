@@ -588,12 +588,25 @@
      played: Game 1 Jon 1st, Kevin 2nd, Amy 3rd, Jane 4th; Game 2
      Jane 1st, Jon 2nd, Kevin 3rd, Amy 4th. */
   var LEDGER_DATE = "2026-10-31";
+  // Golf rounds settled by the CPU scorekeeper from the Commissioner's
+  // report (winner 4 pts, 2nd 3, 3rd 2, 4th 1) — seeded the same way as
+  // Day 1, so every copy opens with them in the book: Nov 1 finished
+  // Amy 1st, Jon 2nd, Kevin 3rd, Jane 4th; Nov 2 finished Jane 1st,
+  // Jon 2nd, Kevin 3rd, Amy 4th.
+  var LEDGER_GOLF = [
+    { pts: { Jon: 3, Jane: 1, Kevin: 2, Amy: 4 }, date: "2026-11-01" },
+    { pts: { Jon: 3, Jane: 4, Kevin: 2, Amy: 1 }, date: "2026-11-02" }
+  ];
   var LEDGER_WORDLE = { tries: { Jon: 5, Jane: 7, Kevin: 5, Amy: 5 }, date: LEDGER_DATE };
   var LEDGER_CARDS = [
     { scores: { Jon: 1, Jane: 4, Kevin: 2, Amy: 3 }, date: LEDGER_DATE },
     { scores: { Jon: 2, Jane: 1, Kevin: 3, Amy: 4 }, date: LEDGER_DATE }
   ];
   var ledgerSeeded = false;
+  // The Golf rounds arrived after Day 1's seed had already run on
+  // existing copies, so they carry their own one-time flag: seeded
+  // once on any copy that lacks them, then left alone for good.
+  var ledgerGolfSeeded = false;
   function sameNumMap(a, b){
     if (!a || !b) return false;
     for (var i = 0; i < PLAYERS.length; i++){
@@ -602,6 +615,16 @@
     return true;
   }
   function applyLedgerSeed(){
+    if (!ledgerGolfSeeded){
+      LEDGER_GOLF.forEach(function(round){
+        var has = state.golf.some(function(e){
+          return e.date === round.date && sameNumMap(e.pts, round.pts);
+        });
+        if (!has) state.golf.push({ pts: { Jon: round.pts.Jon, Jane: round.pts.Jane, Kevin: round.pts.Kevin, Amy: round.pts.Amy }, date: round.date });
+        if (createdByEvent.golf.indexOf(round.date) < 0) createdByEvent.golf.push(round.date);
+      });
+      ledgerGolfSeeded = true;
+    }
     if (ledgerSeeded) return;
     var hasWordle = state.wordle.some(function(e){
       return e.date === LEDGER_DATE && sameNumMap(e.tries, LEDGER_WORDLE.tries);
@@ -692,13 +715,14 @@
     mergeCreated(data.created);
     if (typeof data.savedAt === "string") lastSavedAt = data.savedAt;
     if (data.ledgerSeeded === true) ledgerSeeded = true;
+    if (data.ledgerGolfSeeded === true) ledgerGolfSeeded = true;
   }
   function persist(){
     lastSavedAt = new Date().toISOString();
     if (!storageOK) return;
     try {
       window.localStorage.setItem(STORE_KEY, JSON.stringify({
-        v: 1, savedAt: lastSavedAt, state: state, ledgerSeeded: ledgerSeeded,
+        v: 1, savedAt: lastSavedAt, state: state, ledgerSeeded: ledgerSeeded, ledgerGolfSeeded: ledgerGolfSeeded,
         created: { golf: createdByEvent.golf, pickle: createdByEvent.pickle, cards: createdByEvent.cards }
       }));
     } catch (err) { storageOK = false; }
@@ -1283,7 +1307,7 @@
         '<span class="h-body">' + describeFinish(groups, entry.pts, " pts") + '</span>' +
         '<button class="del" type="button" data-del-golf="' + i + '">Remove</button></div>';
     }).join("");
-    var stats = tallySimple(state.golf, "golf");
+    var stats = eventStats("golf");
     stand.innerHTML = standingsHTML(stats, "Golf standings — all dates", function(p, s){
       return s.wins + (s.wins === 1 ? " round win" : " round wins") + " · " + fmt(s.raw) + " raw pts";
     });
@@ -1304,7 +1328,7 @@
         '<span class="h-body">' + describeFinish(groups, entry.scores, "") + '</span>' +
         '<button class="del" type="button" data-del-cards="' + i + '">Remove</button></div>';
     }).join("");
-    var stats = tallySimple(state.cards, "cards");
+    var stats = eventStats("cards");
     stand.innerHTML = standingsHTML(stats, "Cards standings — all dates", function(p, s){
       return s.wins + (s.wins === 1 ? " game win" : " game wins") + " · " + fmt(s.raw) + " total score";
     });
@@ -1326,7 +1350,7 @@
         '<span class="h-body">' + body + '</span>' +
         '<button class="del" type="button" data-del-wordle="' + i + '">Remove</button></div>';
     }).join("");
-    var stats = tallySimple(state.wordle, "wordle");
+    var stats = eventStats("wordle");
     var days = state.wordle.length;
     stand.innerHTML = standingsHTML(stats, "Wordle standings — all dates", function(p, s){
       var avg = days ? (Math.round((s.raw / days) * 10) / 10) : 0;
@@ -1365,7 +1389,7 @@
         }).join(" · ");
         return '<div class="sline"><b>' + label + '</b> · ' + day.count + (day.count === 1 ? ' rotation' : ' rotations') + '<br>' + line + '</div>';
       }).join("") + '</div>';
-    var stats = tallyPickle();
+    var stats = eventStats("pickle");
     var counts = {};
     PLAYERS.forEach(function(p){ counts[p] = [0,0,0,0]; });
     state.pickle.forEach(function(entry){
