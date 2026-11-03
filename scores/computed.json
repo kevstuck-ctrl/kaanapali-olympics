@@ -7,8 +7,26 @@
   ],
   "events": {
     "golf": {
-      "per_date": {},
-      "totals": {}
+      "per_date": {
+        "2026-11-01": {
+          "Amy": 4,
+          "Jon": 3,
+          "Kevin": 2,
+          "Jane": 1
+        },
+        "2026-11-02": {
+          "Jane": 4,
+          "Jon": 3,
+          "Kevin": 2,
+          "Amy": 1
+        }
+      },
+      "totals": {
+        "Amy": 5.0,
+        "Jon": 6.0,
+        "Kevin": 4.0,
+        "Jane": 5.0
+      }
     },
     "pickleball": {
       "per_date": {},
@@ -49,10 +67,10 @@
     }
   },
   "overall": {
-    "Kevin": 8.0,
-    "Amy": 6.0,
-    "Jon": 10.0,
-    "Jane": 6.0
+    "Kevin": 12.0,
+    "Amy": 11.0,
+    "Jon": 16.0,
+    "Jane": 11.0
   },
   "medal_order": [
     "Jon",
