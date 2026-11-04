@@ -597,6 +597,12 @@
     { pts: { Jon: 3, Jane: 1, Kevin: 2, Amy: 4 }, date: "2026-11-01" },
     { pts: { Jon: 3, Jane: 4, Kevin: 2, Amy: 1 }, date: "2026-11-02" }
   ];
+  // The Nov 3 round arrived after existing copies had already consumed
+  // the LEDGER_GOLF seed and saved its one-time flag, so it seeds on its
+  // own flag below: Jon and Kevin tied for 1st (splitting 4+3 = 3.5
+  // each) and Jane and Amy tied for 3rd (splitting 2+1 = 1.5 each),
+  // settled by the CPU scorekeeper from the Commissioner's report.
+  var LEDGER_GOLF_NOV3 = { pts: { Jon: 3.5, Jane: 1.5, Kevin: 3.5, Amy: 1.5 }, date: "2026-11-03" };
   var LEDGER_WORDLE = { tries: { Jon: 5, Jane: 7, Kevin: 5, Amy: 5 }, date: LEDGER_DATE };
   var LEDGER_CARDS = [
     { scores: { Jon: 1, Jane: 4, Kevin: 2, Amy: 3 }, date: LEDGER_DATE },
@@ -607,6 +613,8 @@
   // existing copies, so they carry their own one-time flag: seeded
   // once on any copy that lacks them, then left alone for good.
   var ledgerGolfSeeded = false;
+  // The Nov 3 Golf round's own one-time flag, for the same reason.
+  var ledgerGolfNov3Seeded = false;
   function sameNumMap(a, b){
     if (!a || !b) return false;
     for (var i = 0; i < PLAYERS.length; i++){
@@ -615,6 +623,15 @@
     return true;
   }
   function applyLedgerSeed(){
+    if (!ledgerGolfNov3Seeded){
+      var round3 = LEDGER_GOLF_NOV3;
+      var has3 = state.golf.some(function(e){
+        return e.date === round3.date && sameNumMap(e.pts, round3.pts);
+      });
+      if (!has3) state.golf.push({ pts: { Jon: round3.pts.Jon, Jane: round3.pts.Jane, Kevin: round3.pts.Kevin, Amy: round3.pts.Amy }, date: round3.date });
+      if (createdByEvent.golf.indexOf(round3.date) < 0) createdByEvent.golf.push(round3.date);
+      ledgerGolfNov3Seeded = true;
+    }
     if (!ledgerGolfSeeded){
       LEDGER_GOLF.forEach(function(round){
         var has = state.golf.some(function(e){
@@ -716,13 +733,14 @@
     if (typeof data.savedAt === "string") lastSavedAt = data.savedAt;
     if (data.ledgerSeeded === true) ledgerSeeded = true;
     if (data.ledgerGolfSeeded === true) ledgerGolfSeeded = true;
+    if (data.ledgerGolfNov3Seeded === true) ledgerGolfNov3Seeded = true;
   }
   function persist(){
     lastSavedAt = new Date().toISOString();
     if (!storageOK) return;
     try {
       window.localStorage.setItem(STORE_KEY, JSON.stringify({
-        v: 1, savedAt: lastSavedAt, state: state, ledgerSeeded: ledgerSeeded, ledgerGolfSeeded: ledgerGolfSeeded,
+        v: 1, savedAt: lastSavedAt, state: state, ledgerSeeded: ledgerSeeded, ledgerGolfSeeded: ledgerGolfSeeded, ledgerGolfNov3Seeded: ledgerGolfNov3Seeded,
         created: { golf: createdByEvent.golf, pickle: createdByEvent.pickle, cards: createdByEvent.cards }
       }));
     } catch (err) { storageOK = false; }
