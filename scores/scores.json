@@ -164,12 +164,18 @@
     {
       "date": "2026-11-05",
       "points": {
-        "Jane": 4,
+        "Jon": 4,
         "Kevin": 2.5,
         "Amy": 2.5,
-        "Jon": 1
+        "Jane": 1
       },
-      "note": "Entered in app as strokes (Jane 73, Kevin 75, Amy 75, Jon 78); settled lowest-wins, 75s tied split 2.5 each."
+      "note": "Actual strokes per Commissioner correction 2026-11-05 20:58 HST (Jon 73, Kevin 75, Amy 75, Jane 78); settled lowest-wins, 75s tied split 2.5 each. Supersedes the first settlement, which was taken from the phone-app entry that had Jon and Jane transposed. Golf ruled LOW SCORE (strokes) by the Commissioner 2026-11-05.",
+      "raw": {
+        "Jon": 73,
+        "Kevin": 75,
+        "Amy": 75,
+        "Jane": 78
+      }
     }
   ],
   "pickleball": [],
