@@ -19,6 +19,118 @@
         "Kevin": 2,
         "Amy": 1
       }
+    },
+    {
+      "date": "2026-11-01",
+      "game": 3,
+      "points": {
+        "Jon": 4,
+        "Kevin": 3,
+        "Jane": 2,
+        "Amy": 1
+      },
+      "raw": {
+        "Jon": 77,
+        "Jane": 91,
+        "Kevin": 89,
+        "Amy": 95
+      }
+    },
+    {
+      "date": "2026-11-01",
+      "game": 4,
+      "points": {
+        "Amy": 4,
+        "Kevin": 3,
+        "Jane": 2,
+        "Jon": 1
+      },
+      "raw": {
+        "Jon": 114,
+        "Jane": 108,
+        "Kevin": 100,
+        "Amy": 71
+      }
+    },
+    {
+      "date": "2026-11-01",
+      "game": 5,
+      "points": {
+        "Kevin": 4,
+        "Jane": 3,
+        "Jon": 2,
+        "Amy": 1
+      },
+      "raw": {
+        "Jon": 94,
+        "Jane": 77,
+        "Kevin": 68,
+        "Amy": 118
+      }
+    },
+    {
+      "date": "2026-11-01",
+      "game": 6,
+      "points": {
+        "Amy": 4,
+        "Kevin": 3,
+        "Jon": 2,
+        "Jane": 1
+      },
+      "raw": {
+        "Jon": 89,
+        "Jane": 103,
+        "Kevin": 75,
+        "Amy": 58
+      }
+    },
+    {
+      "date": "2026-11-04",
+      "game": 7,
+      "points": {
+        "Kevin": 4,
+        "Jane": 3,
+        "Amy": 2,
+        "Jon": 1
+      },
+      "raw": {
+        "Jon": 4,
+        "Jane": 2,
+        "Kevin": 1,
+        "Amy": 3
+      }
+    },
+    {
+      "date": "2026-11-04",
+      "game": 8,
+      "points": {
+        "Jane": 4,
+        "Kevin": 3,
+        "Jon": 2,
+        "Amy": 1
+      },
+      "raw": {
+        "Jon": 91,
+        "Jane": 71,
+        "Kevin": 81,
+        "Amy": 138
+      }
+    },
+    {
+      "date": "2026-11-05",
+      "game": 9,
+      "points": {
+        "Jane": 4,
+        "Jon": 2.5,
+        "Amy": 2.5,
+        "Kevin": 1
+      },
+      "raw": {
+        "Jon": 89,
+        "Jane": 85,
+        "Kevin": 97,
+        "Amy": 89
+      }
     }
   ],
   "golf": [
