@@ -631,6 +631,39 @@
     { scores: { Jon: 1, Jane: 4, Kevin: 2, Amy: 3 }, date: LEDGER_DATE },
     { scores: { Jon: 2, Jane: 1, Kevin: 3, Amy: 4 }, date: LEDGER_DATE }
   ];
+  // Cards Games 3–9, settled by the CPU scorekeeper from the
+  // Commissioner's report (his phone copy already holds them; published
+  // copies did not). Stored exactly like the Day 1 games above — the
+  // raw Golf-card scores in `scores`, lowest wins — from which the
+  // CPU derives the settled Olympic points noted per game:
+  // Game 3, Sun Nov 1: raw Jon 77, Jane 91, Kevin 89, Amy 95
+  //   → points Jon 4, Kevin 3, Jane 2, Amy 1.
+  // Game 4, Sun Nov 1: raw Jon 114, Jane 108, Kevin 100, Amy 71
+  //   → points Amy 4, Kevin 3, Jane 2, Jon 1.
+  // Game 5, Sun Nov 1: raw Jon 94, Jane 77, Kevin 68, Amy 118
+  //   → points Kevin 4, Jane 3, Jon 2, Amy 1.
+  // Game 6, Sun Nov 1: raw Jon 89, Jane 103, Kevin 75, Amy 58
+  //   → points Amy 4, Kevin 3, Jon 2, Jane 1.
+  // Game 7, Wed Nov 4: raw Jon 4, Jane 2, Kevin 1, Amy 3
+  //   → points Kevin 4, Jane 3, Amy 2, Jon 1.
+  // Game 8, Wed Nov 4: raw Jon 91, Jane 71, Kevin 81, Amy 138
+  //   → points Jane 4, Kevin 3, Jon 2, Amy 1.
+  // Game 9, Thu Nov 5: raw Jon 89, Jane 85, Kevin 97, Amy 89
+  //   → points Jane 4, Jon 2.5, Amy 2.5, Kevin 1 (Jon/Amy tied on 89).
+  // They arrived after existing copies had consumed the Day 1 seed, so
+  // they seed on their own one-time flag below — deduped on
+  // date+scores (each game on a shared date has its own score line, so
+  // each lands exactly once, and a copy that already holds a game —
+  // like the Commissioner's phone — never double-counts it).
+  var LEDGER_CARDS_GAMES = [
+    { scores: { Jon: 77, Jane: 91, Kevin: 89, Amy: 95 }, date: "2026-11-01" },
+    { scores: { Jon: 114, Jane: 108, Kevin: 100, Amy: 71 }, date: "2026-11-01" },
+    { scores: { Jon: 94, Jane: 77, Kevin: 68, Amy: 118 }, date: "2026-11-01" },
+    { scores: { Jon: 89, Jane: 103, Kevin: 75, Amy: 58 }, date: "2026-11-01" },
+    { scores: { Jon: 4, Jane: 2, Kevin: 1, Amy: 3 }, date: "2026-11-04" },
+    { scores: { Jon: 91, Jane: 71, Kevin: 81, Amy: 138 }, date: "2026-11-04" },
+    { scores: { Jon: 89, Jane: 85, Kevin: 97, Amy: 89 }, date: "2026-11-05" }
+  ];
   var ledgerSeeded = false;
   // The Golf rounds arrived after Day 1's seed had already run on
   // existing copies, so they carry their own one-time flag: seeded
@@ -642,6 +675,8 @@
   var ledgerGolfNov5Seeded = false;
   // The Nov 1–5 Wordle days' own one-time flag, for the same reason.
   var ledgerWordleDaysSeeded = false;
+  // The Cards Games 3–9 own one-time flag, for the same reason.
+  var ledgerCardsGamesSeeded = false;
   function sameNumMap(a, b){
     if (!a || !b) return false;
     for (var i = 0; i < PLAYERS.length; i++){
@@ -698,19 +733,35 @@
       });
       ledgerWordleDaysSeeded = true;
     }
-    if (ledgerSeeded) return;
-    var hasWordle = state.wordle.some(function(e){
-      return e.date === LEDGER_DATE && sameNumMap(e.tries, LEDGER_WORDLE.tries);
-    });
-    if (!hasWordle) state.wordle.push({ tries: { Jon: 5, Jane: 7, Kevin: 5, Amy: 5 }, date: LEDGER_DATE });
-    LEDGER_CARDS.forEach(function(game){
-      var has = state.cards.some(function(e){
-        return e.date === LEDGER_DATE && sameNumMap(e.scores, game.scores);
+    if (!ledgerSeeded){
+      var hasWordle = state.wordle.some(function(e){
+        return e.date === LEDGER_DATE && sameNumMap(e.tries, LEDGER_WORDLE.tries);
       });
-      if (!has) state.cards.push({ scores: { Jon: game.scores.Jon, Jane: game.scores.Jane, Kevin: game.scores.Kevin, Amy: game.scores.Amy }, date: LEDGER_DATE });
-    });
-    if (createdByEvent.cards.indexOf(LEDGER_DATE) < 0) createdByEvent.cards.push(LEDGER_DATE);
-    ledgerSeeded = true;
+      if (!hasWordle) state.wordle.push({ tries: { Jon: 5, Jane: 7, Kevin: 5, Amy: 5 }, date: LEDGER_DATE });
+      LEDGER_CARDS.forEach(function(game){
+        var has = state.cards.some(function(e){
+          return e.date === LEDGER_DATE && sameNumMap(e.scores, game.scores);
+        });
+        if (!has) state.cards.push({ scores: { Jon: game.scores.Jon, Jane: game.scores.Jane, Kevin: game.scores.Kevin, Amy: game.scores.Amy }, date: LEDGER_DATE });
+      });
+      if (createdByEvent.cards.indexOf(LEDGER_DATE) < 0) createdByEvent.cards.push(LEDGER_DATE);
+      ledgerSeeded = true;
+    }
+    // Cards Games 3–9 run AFTER the Day 1 block above (not before it),
+    // so on a fresh copy the games land in played order — Games 1–2
+    // first, then 3–9 — while copies that consumed the Day 1 seed long
+    // ago still pick these up on their own flag. Once this flag is
+    // saved, later in-app removals or edits stick.
+    if (!ledgerCardsGamesSeeded){
+      LEDGER_CARDS_GAMES.forEach(function(game){
+        var has = state.cards.some(function(e){
+          return e.date === game.date && sameNumMap(e.scores, game.scores);
+        });
+        if (!has) state.cards.push({ scores: { Jon: game.scores.Jon, Jane: game.scores.Jane, Kevin: game.scores.Kevin, Amy: game.scores.Amy }, date: game.date });
+        if (createdByEvent.cards.indexOf(game.date) < 0) createdByEvent.cards.push(game.date);
+      });
+      ledgerCardsGamesSeeded = true;
+    }
   }
   function cleanDateStr(d){
     return (typeof d === "string" && /^\d{4}-\d{2}-\d{2}$/.test(d)) ? d : "";
@@ -795,13 +846,14 @@
     if (data.ledgerGolfNov3Seeded === true) ledgerGolfNov3Seeded = true;
     if (data.ledgerGolfNov5Seeded === true) ledgerGolfNov5Seeded = true;
     if (data.ledgerWordleDaysSeeded === true) ledgerWordleDaysSeeded = true;
+    if (data.ledgerCardsGamesSeeded === true) ledgerCardsGamesSeeded = true;
   }
   function persist(){
     lastSavedAt = new Date().toISOString();
     if (!storageOK) return;
     try {
       window.localStorage.setItem(STORE_KEY, JSON.stringify({
-        v: 1, savedAt: lastSavedAt, state: state, ledgerSeeded: ledgerSeeded, ledgerGolfSeeded: ledgerGolfSeeded, ledgerGolfNov3Seeded: ledgerGolfNov3Seeded, ledgerGolfNov5Seeded: ledgerGolfNov5Seeded, ledgerWordleDaysSeeded: ledgerWordleDaysSeeded,
+        v: 1, savedAt: lastSavedAt, state: state, ledgerSeeded: ledgerSeeded, ledgerGolfSeeded: ledgerGolfSeeded, ledgerGolfNov3Seeded: ledgerGolfNov3Seeded, ledgerGolfNov5Seeded: ledgerGolfNov5Seeded, ledgerWordleDaysSeeded: ledgerWordleDaysSeeded, ledgerCardsGamesSeeded: ledgerCardsGamesSeeded,
         created: { golf: createdByEvent.golf, pickle: createdByEvent.pickle, cards: createdByEvent.cards }
       }));
     } catch (err) { storageOK = false; }
