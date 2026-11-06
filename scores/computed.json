@@ -116,21 +116,27 @@
           "Amy": 3.5,
           "Jon": 2.0,
           "Jane": 3.5
+        },
+        "2026-11-06": {
+          "Kevin": 4.0,
+          "Amy": 1.0,
+          "Jon": 2.5,
+          "Jane": 2.5
         }
       },
       "totals": {
-        "Kevin": 15.5,
-        "Amy": 14.5,
-        "Jon": 13.5,
-        "Jane": 16.5
+        "Kevin": 19.5,
+        "Amy": 15.5,
+        "Jon": 16.0,
+        "Jane": 19.0
       }
     }
   },
   "overall": {
-    "Kevin": 51.5,
-    "Amy": 42.0,
-    "Jon": 48.5,
-    "Jane": 48.0
+    "Kevin": 55.5,
+    "Amy": 43.0,
+    "Jon": 51.0,
+    "Jane": 50.5
   },
   "medal_order": [
     "Kevin",
