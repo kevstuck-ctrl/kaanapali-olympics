@@ -52,13 +52,31 @@
           "Kevin": 5,
           "Amy": 3,
           "Jane": 5
+        },
+        "2026-11-01": {
+          "Jon": 9,
+          "Kevin": 13,
+          "Jane": 8,
+          "Amy": 10
+        },
+        "2026-11-04": {
+          "Kevin": 7,
+          "Jane": 7,
+          "Amy": 3,
+          "Jon": 3
+        },
+        "2026-11-05": {
+          "Jane": 4,
+          "Jon": 2.5,
+          "Amy": 2.5,
+          "Kevin": 1
         }
       },
       "totals": {
-        "Jon": 7.0,
-        "Kevin": 5.0,
-        "Amy": 3.0,
-        "Jane": 5.0
+        "Jon": 21.5,
+        "Kevin": 26.0,
+        "Amy": 18.5,
+        "Jane": 24.0
       }
     },
     "wordle": {
@@ -109,15 +127,15 @@
     }
   },
   "overall": {
-    "Kevin": 30.5,
-    "Amy": 26.5,
-    "Jon": 31.0,
-    "Jane": 32.0
+    "Kevin": 51.5,
+    "Amy": 42.0,
+    "Jon": 45.5,
+    "Jane": 51.0
   },
   "medal_order": [
+    "Kevin",
     "Jane",
     "Jon",
-    "Kevin",
     "Amy"
   ]
 }
