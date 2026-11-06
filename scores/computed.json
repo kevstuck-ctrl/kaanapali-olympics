@@ -27,17 +27,17 @@
           "Amy": 1.5
         },
         "2026-11-05": {
-          "Jane": 4,
+          "Jon": 4,
           "Kevin": 2.5,
           "Amy": 2.5,
-          "Jon": 1
+          "Jane": 1
         }
       },
       "totals": {
         "Amy": 9.0,
-        "Jon": 10.5,
+        "Jon": 13.5,
         "Kevin": 10.0,
-        "Jane": 10.5
+        "Jane": 7.5
       }
     },
     "pickleball": {
@@ -129,13 +129,13 @@
   "overall": {
     "Kevin": 51.5,
     "Amy": 42.0,
-    "Jon": 45.5,
-    "Jane": 51.0
+    "Jon": 48.5,
+    "Jane": 48.0
   },
   "medal_order": [
     "Kevin",
-    "Jane",
     "Jon",
+    "Jane",
     "Amy"
   ]
 }
