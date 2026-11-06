@@ -634,6 +634,15 @@
     { tries: { Jon: 5, Jane: 4, Kevin: 3, Amy: 7 }, date: "2026-11-04" },
     { tries: { Jon: 4, Jane: 3, Kevin: 5, Amy: 3 }, date: "2026-11-05" }
   ];
+  // Final-day Wordle, Fri Nov 6, settled by the CPU scorekeeper from
+  // the Commissioner's report (raw tries): Kevin 3, Jane 4, Jon 4,
+  // Amy 5 → Kevin 4 pts, Jane and Jon tied at 4 guesses split
+  // 3+2 = 2.5 each, Amy 1 pt. It arrived after existing copies had
+  // already consumed the Nov 1–5 seed and saved its flag, so it seeds
+  // on its own one-time flag below — deduped on date+tries so it
+  // lands exactly once, and once the flag is saved, later in-app
+  // removals or edits stick.
+  var LEDGER_WORDLE_NOV6 = { tries: { Jon: 4, Jane: 4, Kevin: 3, Amy: 5 }, date: "2026-11-06" };
   var LEDGER_CARDS = [
     { scores: { Jon: 1, Jane: 4, Kevin: 2, Amy: 3 }, date: LEDGER_DATE },
     { scores: { Jon: 2, Jane: 1, Kevin: 3, Amy: 4 }, date: LEDGER_DATE }
@@ -686,6 +695,8 @@
   var ledgerGolfNov5Corrected = false;
   // The Nov 1–5 Wordle days' own one-time flag, for the same reason.
   var ledgerWordleDaysSeeded = false;
+  // The Nov 6 Wordle day's own one-time flag, for the same reason.
+  var ledgerWordleNov6Seeded = false;
   // The Cards Games 3–9 own one-time flag, for the same reason.
   var ledgerCardsGamesSeeded = false;
   function sameNumMap(a, b){
@@ -760,6 +771,14 @@
         if (!has) state.wordle.push({ tries: { Jon: day.tries.Jon, Jane: day.tries.Jane, Kevin: day.tries.Kevin, Amy: day.tries.Amy }, date: day.date });
       });
       ledgerWordleDaysSeeded = true;
+    }
+    if (!ledgerWordleNov6Seeded){
+      var day6 = LEDGER_WORDLE_NOV6;
+      var has6 = state.wordle.some(function(e){
+        return e.date === day6.date && sameNumMap(e.tries, day6.tries);
+      });
+      if (!has6) state.wordle.push({ tries: { Jon: day6.tries.Jon, Jane: day6.tries.Jane, Kevin: day6.tries.Kevin, Amy: day6.tries.Amy }, date: day6.date });
+      ledgerWordleNov6Seeded = true;
     }
     if (!ledgerSeeded){
       var hasWordle = state.wordle.some(function(e){
@@ -875,6 +894,7 @@
     if (data.ledgerGolfNov5Seeded === true) ledgerGolfNov5Seeded = true;
     if (data.ledgerGolfNov5Corrected === true) ledgerGolfNov5Corrected = true;
     if (data.ledgerWordleDaysSeeded === true) ledgerWordleDaysSeeded = true;
+    if (data.ledgerWordleNov6Seeded === true) ledgerWordleNov6Seeded = true;
     if (data.ledgerCardsGamesSeeded === true) ledgerCardsGamesSeeded = true;
   }
   function persist(){
@@ -882,7 +902,7 @@
     if (!storageOK) return;
     try {
       window.localStorage.setItem(STORE_KEY, JSON.stringify({
-        v: 1, savedAt: lastSavedAt, state: state, ledgerSeeded: ledgerSeeded, ledgerGolfSeeded: ledgerGolfSeeded, ledgerGolfNov3Seeded: ledgerGolfNov3Seeded, ledgerGolfNov5Seeded: ledgerGolfNov5Seeded, ledgerGolfNov5Corrected: ledgerGolfNov5Corrected, ledgerWordleDaysSeeded: ledgerWordleDaysSeeded, ledgerCardsGamesSeeded: ledgerCardsGamesSeeded,
+        v: 1, savedAt: lastSavedAt, state: state, ledgerSeeded: ledgerSeeded, ledgerGolfSeeded: ledgerGolfSeeded, ledgerGolfNov3Seeded: ledgerGolfNov3Seeded, ledgerGolfNov5Seeded: ledgerGolfNov5Seeded, ledgerGolfNov5Corrected: ledgerGolfNov5Corrected, ledgerWordleDaysSeeded: ledgerWordleDaysSeeded, ledgerWordleNov6Seeded: ledgerWordleNov6Seeded, ledgerCardsGamesSeeded: ledgerCardsGamesSeeded,
         created: { golf: createdByEvent.golf, pickle: createdByEvent.pickle, cards: createdByEvent.cards }
       }));
     } catch (err) { storageOK = false; }
