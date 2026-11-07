@@ -1,10 +1,10 @@
 KAANAPALI OLYMPICS — OFFICIAL SCORING REPORT
 
 Medal board (total points):
-  1. Kevin — 59.5
-  2. Jon — 54
-  3. Jane — 51.5
-  4. Amy — 45
+  1. Kevin — 61.5
+  2. Jon — 55
+  3. Jane — 55
+  4. Amy — 48.5
 
 Golf:
   2026-11-01: Kevin 4, Amy 2, Jon 3, Jane 1
@@ -28,4 +28,5 @@ Wordle:
   2026-11-04: Kevin 4, Amy 1, Jon 2, Jane 3
   2026-11-05: Kevin 1, Amy 3.5, Jon 2, Jane 3.5
   2026-11-06: Kevin 4, Amy 1, Jon 2.5, Jane 2.5
-  Totals: Kevin 19.5, Amy 15.5, Jon 16, Jane 19
+  2026-11-07: Kevin 2, Amy 3.5, Jon 1, Jane 3.5
+  Totals: Kevin 21.5, Amy 19, Jon 17, Jane 22.5
