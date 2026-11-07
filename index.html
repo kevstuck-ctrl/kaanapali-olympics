@@ -614,6 +614,17 @@
   // tied on 75 (splitting 3+2 = 2.5 each) and Jane finished 4th on 78
   // (1 pt), settled lowest-wins by the CPU scorekeeper. The seed stores
   // the settled points, not the strokes.
+  // Second golf round on Sun Nov 1, corrected by the Commissioner:
+  // TWO rounds were played that day, not one. Round 1 is the points
+  // game already in LEDGER_GOLF above (Amy 1st, Jon 2nd, Kevin 3rd,
+  // Jane 4th). This Round 2 finished Kevin 1st, Jon 2nd, Amy 3rd,
+  // Jane 4th — settled points Kevin 4, Jon 3, Amy 2, Jane 1. It
+  // shares Round 1's date (2026-11-01) but has different points, and
+  // it seeds on its own flag below, deduped on date+points, so it is
+  // always a separate round from Round 1: it lands exactly once on
+  // every copy, never merges with or replaces Round 1, and once its
+  // flag is saved, later in-app removals or edits stick.
+  var LEDGER_GOLF_NOV1_R2 = { pts: { Jon: 3, Jane: 1, Kevin: 4, Amy: 2 }, date: "2026-11-01", settled: true };
   var LEDGER_GOLF_NOV5 = { pts: { Jon: 4, Jane: 1, Kevin: 2.5, Amy: 2.5 }, date: "2026-11-05", settled: true };
   // The exact WRONG entry the v10 seed planted (Jon and Jane transposed).
   // The one-time correction migration below is keyed to this exact
@@ -643,6 +654,15 @@
   // lands exactly once, and once the flag is saved, later in-app
   // removals or edits stick.
   var LEDGER_WORDLE_NOV6 = { tries: { Jon: 4, Jane: 4, Kevin: 3, Amy: 5 }, date: "2026-11-06" };
+  // Final Wordle day, Sat Nov 7, settled by the CPU scorekeeper from
+  // the Commissioner's report (raw tries): Jane 4, Amy 4, Kevin 5,
+  // Jon 6 → Jane and Amy tied at 4 guesses split 4+3 = 3.5 each,
+  // Kevin 2 pts, Jon 1 pt. It arrived after existing copies had
+  // already consumed the Nov 6 seed and saved its flag, so it seeds
+  // on its own one-time flag below — deduped on date+tries so it
+  // lands exactly once, and once the flag is saved, later in-app
+  // removals or edits stick.
+  var LEDGER_WORDLE_NOV7 = { tries: { Jon: 6, Jane: 4, Kevin: 5, Amy: 4 }, date: "2026-11-07" };
   var LEDGER_CARDS = [
     { scores: { Jon: 1, Jane: 4, Kevin: 2, Amy: 3 }, date: LEDGER_DATE },
     { scores: { Jon: 2, Jane: 1, Kevin: 3, Amy: 4 }, date: LEDGER_DATE }
@@ -689,6 +709,10 @@
   var ledgerGolfNov3Seeded = false;
   // The Nov 5 Golf round's own one-time flag, for the same reason.
   var ledgerGolfNov5Seeded = false;
+  // The Nov 1 Round 2 Golf round's own one-time flag — distinct from
+  // the LEDGER_GOLF flag even though it shares Round 1's date, so
+  // copies that already hold Round 1 still pick Round 2 up once.
+  var ledgerGolfNov1R2Seeded = false;
   // One-time correction flag for the transposed v10 Nov 5 seed: once
   // the correction below has run on a copy, this flag is saved with
   // the book and the correction never fires again.
@@ -697,6 +721,8 @@
   var ledgerWordleDaysSeeded = false;
   // The Nov 6 Wordle day's own one-time flag, for the same reason.
   var ledgerWordleNov6Seeded = false;
+  // The Nov 7 Wordle day's own one-time flag, for the same reason.
+  var ledgerWordleNov7Seeded = false;
   // The Cards Games 3–9 own one-time flag, for the same reason.
   var ledgerCardsGamesSeeded = false;
   function sameNumMap(a, b){
@@ -712,7 +738,7 @@
     // settled round (its numbers are Olympic points, not strokes), so
     // flag it before anything tallies — otherwise it would be re-read
     // as a stroke score and the round would flip.
-    var allLedgerGolf = LEDGER_GOLF.concat([LEDGER_GOLF_NOV3, LEDGER_GOLF_NOV5]);
+    var allLedgerGolf = LEDGER_GOLF.concat([LEDGER_GOLF_NOV3, LEDGER_GOLF_NOV5, LEDGER_GOLF_NOV1_R2]);
     state.golf.forEach(function(e){
       allLedgerGolf.forEach(function(r){
         if (e.date === r.date && sameNumMap(e.pts, r.pts)) e.settled = true;
@@ -763,6 +789,20 @@
       });
       ledgerGolfSeeded = true;
     }
+    if (!ledgerGolfNov1R2Seeded){
+      // Nov 1 Round 2 seeds AFTER the LEDGER_GOLF block above so on a
+      // fresh copy Round 1 lands before Round 2. The dedupe key is
+      // date+points: Round 2's points differ from Round 1's, so a copy
+      // holding only Round 1 is correctly seen as missing Round 2,
+      // and a copy already holding Round 2 never double-counts it.
+      var round1r2 = LEDGER_GOLF_NOV1_R2;
+      var has1r2 = state.golf.some(function(e){
+        return e.date === round1r2.date && sameNumMap(e.pts, round1r2.pts);
+      });
+      if (!has1r2) state.golf.push({ pts: { Jon: round1r2.pts.Jon, Jane: round1r2.pts.Jane, Kevin: round1r2.pts.Kevin, Amy: round1r2.pts.Amy }, date: round1r2.date, settled: true });
+      if (createdByEvent.golf.indexOf(round1r2.date) < 0) createdByEvent.golf.push(round1r2.date);
+      ledgerGolfNov1R2Seeded = true;
+    }
     if (!ledgerWordleDaysSeeded){
       LEDGER_WORDLE_DAYS.forEach(function(day){
         var has = state.wordle.some(function(e){
@@ -779,6 +819,14 @@
       });
       if (!has6) state.wordle.push({ tries: { Jon: day6.tries.Jon, Jane: day6.tries.Jane, Kevin: day6.tries.Kevin, Amy: day6.tries.Amy }, date: day6.date });
       ledgerWordleNov6Seeded = true;
+    }
+    if (!ledgerWordleNov7Seeded){
+      var day7 = LEDGER_WORDLE_NOV7;
+      var has7 = state.wordle.some(function(e){
+        return e.date === day7.date && sameNumMap(e.tries, day7.tries);
+      });
+      if (!has7) state.wordle.push({ tries: { Jon: day7.tries.Jon, Jane: day7.tries.Jane, Kevin: day7.tries.Kevin, Amy: day7.tries.Amy }, date: day7.date });
+      ledgerWordleNov7Seeded = true;
     }
     if (!ledgerSeeded){
       var hasWordle = state.wordle.some(function(e){
@@ -892,9 +940,11 @@
     if (data.ledgerGolfSeeded === true) ledgerGolfSeeded = true;
     if (data.ledgerGolfNov3Seeded === true) ledgerGolfNov3Seeded = true;
     if (data.ledgerGolfNov5Seeded === true) ledgerGolfNov5Seeded = true;
+    if (data.ledgerGolfNov1R2Seeded === true) ledgerGolfNov1R2Seeded = true;
     if (data.ledgerGolfNov5Corrected === true) ledgerGolfNov5Corrected = true;
     if (data.ledgerWordleDaysSeeded === true) ledgerWordleDaysSeeded = true;
     if (data.ledgerWordleNov6Seeded === true) ledgerWordleNov6Seeded = true;
+    if (data.ledgerWordleNov7Seeded === true) ledgerWordleNov7Seeded = true;
     if (data.ledgerCardsGamesSeeded === true) ledgerCardsGamesSeeded = true;
   }
   function persist(){
@@ -902,7 +952,7 @@
     if (!storageOK) return;
     try {
       window.localStorage.setItem(STORE_KEY, JSON.stringify({
-        v: 1, savedAt: lastSavedAt, state: state, ledgerSeeded: ledgerSeeded, ledgerGolfSeeded: ledgerGolfSeeded, ledgerGolfNov3Seeded: ledgerGolfNov3Seeded, ledgerGolfNov5Seeded: ledgerGolfNov5Seeded, ledgerGolfNov5Corrected: ledgerGolfNov5Corrected, ledgerWordleDaysSeeded: ledgerWordleDaysSeeded, ledgerWordleNov6Seeded: ledgerWordleNov6Seeded, ledgerCardsGamesSeeded: ledgerCardsGamesSeeded,
+        v: 1, savedAt: lastSavedAt, state: state, ledgerSeeded: ledgerSeeded, ledgerGolfSeeded: ledgerGolfSeeded, ledgerGolfNov3Seeded: ledgerGolfNov3Seeded, ledgerGolfNov5Seeded: ledgerGolfNov5Seeded, ledgerGolfNov1R2Seeded: ledgerGolfNov1R2Seeded, ledgerGolfNov5Corrected: ledgerGolfNov5Corrected, ledgerWordleDaysSeeded: ledgerWordleDaysSeeded, ledgerWordleNov6Seeded: ledgerWordleNov6Seeded, ledgerWordleNov7Seeded: ledgerWordleNov7Seeded, ledgerCardsGamesSeeded: ledgerCardsGamesSeeded,
         created: { golf: createdByEvent.golf, pickle: createdByEvent.pickle, cards: createdByEvent.cards }
       }));
     } catch (err) { storageOK = false; }
